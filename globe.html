@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deforestation Globe</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        background: #0a1628;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: white;
+      }
+      
+      h1 {
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+      
+      .subtitle {
+        color: #88a;
+        margin-bottom: 20px;
+      }
+      
+      #globe-wrapper {
+        position: relative;
+      }
+      
+      #globe-container {
+        background: #0a1628;
+        border-radius: 12px;
+        border: 1px solid #1a3a5c;
+      }
+      
+      .hotspot {
+        fill: #e07b39;
+        stroke: #fff;
+        stroke-width: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .hotspot:hover {
+        fill: #dc3545;
+      }
+      
+      .hotspot.selected {
+        fill: #dc3545;
+        stroke: #fff;
+        stroke-width: 3px;
+      }
+      
+      .hotspot-pulse {
+        fill: #e07b39;
+        opacity: 0.3;
+      }
+      
+      #chart-popup {
+        position: absolute;
+        background: rgba(10, 22, 40, 0.95);
+        border: 2px solid #4a7c43;
+        border-radius: 12px;
+        padding: 15px;
+        display: none;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        z-index: 100;
+        min-width: 320px;
+      }
+      
+      #chart-popup.visible {
+        display: block;
+      }
+      
+      #chart-popup h4 {
+        color: #4a7c43;
+        margin-bottom: 5px;
+        font-size: 16px;
+      }
+      
+      #chart-popup .stats {
+        font-size: 12px;
+        color: #88a;
+        margin-bottom: 10px;
+      }
+      
+      #chart-popup .stats span {
+        color: #e07b39;
+        font-weight: bold;
+      }
+      
+      .close-btn {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #88a;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      
+      .close-btn:hover {
+        color: #fff;
+      }
+      
+      .chart-legend {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 8px;
+        font-size: 11px;
+      }
+      
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .legend-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+      }
+      
+      .axis text {
+        fill: #88a;
+        font-size: 10px;
+      }
+      
+      .axis line, .axis path {
+        stroke: #334;
+      }
+      
+      .grid line {
+        stroke: #223;
+        stroke-opacity: 0.5;
+      }
+      
+      .paused-indicator {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: #88a;
+        display: none;
+      }
+      
+      .paused-indicator.visible {
+        display: block;
+      }
+      
+      .resume-btn {
+        background: #4a7c43;
+        border: none;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 4px;
+        margin-left: 10px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      
+      .resume-btn:hover {
+        background: #5a9c53;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🌍 Global Deforestation Hotspots</h1>
+    <p class="subtitle">Drag to rotate. Click a hotspot to see historical data.</p>
+    
+    <div id="globe-wrapper">
+      <div id="globe-container"></div>
+      
+      <div id="chart-popup">
+        <button class="close-btn" onclick="closePopup()">&times;</button>
+        <h4 id="popup-title">Region Name</h4>
+        <div class="stats" id="popup-stats"></div>
+        <div id="chart"></div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #e07b39;"></div>
+            <span>Forest Cover %</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #4a7c43;"></div>
+            <span>Bird Species</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="paused-indicator" id="paused-indicator">
+        ⏸ Globe paused
+        <button class="resume-btn" onclick="resumeRotation()">Resume</button>
+      </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+    <script>
+      // Deforestation data with time series
+      const data = {
+        regions: [
+          { 
+            name: "Amazon", 
+            lat: -3.4653, 
+            lon: -62.2159,
+            timeSeries: [
+              { year: 2000, forestCover: 100, birdSpecies: 1300 },
+              { year: 2005, forestCover: 94, birdSpecies: 1250 },
+              { year: 2010, forestCover: 88, birdSpecies: 1180 },
+              { year: 2015, forestCover: 82, birdSpecies: 1100 },
+              { year: 2020, forestCover: 75, birdSpecies: 1020 },
+              { year: 2024, forestCover: 70, birdSpecies: 950 }
+            ]
+          },
+          { 
+            name: "Congo Basin", 
+            lat: 0.2280, 
+            lon: 21.7587,
+            timeSeries: [
+              { year: 2000, forestCover: 100, birdSpecies: 1000 },
+              { year: 2005, forestCover: 97, birdSpecies: 980 },
+              { year: 2010, forestCover: 93, birdSpecies: 950 },
+              { year: 2015, forestCover: 88, birdSpecies: 910 },
+              { year: 2020, forestCover: 82, birdSpecies: 860 },
+              { year: 2024, forestCover: 77, birdSpecies: 810 }
+            ]
+          },
+          { 
+            name: "Southeast Asia", 
+            lat: 2.5, 
+            lon: 112.5,
+            timeSeries: [
+              { year: 2000, forestCover: 100, birdSpecies: 800 },
+              { year: 2005, forestCover: 91, birdSpecies: 750 },
+              { year: 2010, forestCover: 82, birdSpecies: 690 },
+              { year: 2015, forestCover: 72, birdSpecies: 620 },
+              { year: 2020, forestCover: 63, birdSpecies: 550 },
+              { year: 2024, forestCover: 55, birdSpecies: 490 }
+            ]
+          },
+          { 
+            name: "Central America", 
+            lat: 15.7835, 
+            lon: -90.2308,
+            timeSeries: [
+              { year: 2000, forestCover: 100, birdSpecies: 600 },
+              { year: 2005, forestCover: 95, birdSpecies: 580 },
+              { year: 2010, forestCover: 89, birdSpecies: 550 },
+              { year: 2015, forestCover: 83, birdSpecies: 515 },
+              { year: 2020, forestCover: 77, birdSpecies: 480 },
+              { year: 2024, forestCover: 72, birdSpecies: 450 }
+            ]
+          },
+          { 
+            name: "Madagascar", 
+            lat: -18.7669, 
+            lon: 46.8691,
+            timeSeries: [
+              { year: 2000, forestCover: 100, birdSpecies: 280 },
+              { year: 2005, forestCover: 92, birdSpecies: 265 },
+              { year: 2010, forestCover: 83, birdSpecies: 245 },
+              { year: 2015, forestCover: 74, birdSpecies: 225 },
+              { year: 2020, forestCover: 65, birdSpecies: 200 },
+              { year: 2024, forestCover: 57, birdSpecies: 178 }
+            ]
+          }
+        ]
+      };
+
+      // Add computed properties
+      data.regions.forEach(r => {
+        const latest = r.timeSeries[r.timeSeries.length - 1];
+        const first = r.timeSeries[0];
+        r.forestLoss = first.forestCover - latest.forestCover;
+        r.birdSpecies = latest.birdSpecies;
+      });
+
+      let selectedRegion = null;
+      let isPaused = false;
+
+      // Set up dimensions
+      const width = 600;
+      const height = 600;
+
+      // Create SVG
+      const svg = d3.select("#globe-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      // Projection
+      const projection = d3.geoOrthographic()
+        .scale(280)
+        .translate([width / 2, height / 2])
+        .clipAngle(90)
+        .rotate([-20, -20]);
+
+      const path = d3.geoPath().projection(projection);
+
+      // Water (ocean)
+      svg.append("circle")
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
+        .attr("r", 280)
+        .attr("fill", "#1a3a5c");
+
+      // Graticule (grid)
+      const graticule = d3.geoGraticule();
+      svg.append("path")
+        .datum(graticule)
+        .attr("d", path)
+        .attr("fill", "none")
+        .attr("stroke", "#2a4a6c")
+        .attr("stroke-width", 0.5)
+        .attr("stroke-opacity", 0.4);
+
+      // Land group
+      const landGroup = svg.append("g");
+
+      // Hotspot group
+      const hotspotGroup = svg.append("g");
+
+      // Load world map
+      d3.json("https://unpkg.com/world-atlas@2/countries-110m.json")
+        .then(world => {
+          const countries = topojson.feature(world, world.objects.countries);
+          
+          landGroup.selectAll(".country")
+            .data(countries.features)
+            .enter()
+            .append("path")
+            .attr("class", "country")
+            .attr("d", path)
+            .attr("fill", "#2d5a27")
+            .attr("stroke", "#1a3518")
+            .attr("stroke-width", 0.5);
+          
+          drawHotspots();
+        });
+
+      // Draw hotspots
+      function drawHotspots() {
+        const hotspots = hotspotGroup.selectAll(".hotspot-group")
+          .data(data.regions)
+          .enter()
+          .append("g")
+          .attr("class", "hotspot-group");
+
+        // Pulse animation
+        hotspots.append("circle")
+          .attr("class", "hotspot-pulse")
+          .attr("r", 20);
+
+        // Main hotspot
+        hotspots.append("circle")
+          .attr("class", "hotspot")
+          .attr("r", d => 8 + (d.forestLoss / 5))
+          .on("mouseover", function(event, d) {
+            if (selectedRegion !== d.name) {
+              d3.select(this).attr("fill", "#dc3545");
+            }
+          })
+          .on("mouseout", function(event, d) {
+            if (selectedRegion !== d.name) {
+              d3.select(this).attr("fill", "#e07b39");
+            }
+          })
+          .on("click", function(event, d) {
+            event.stopPropagation();
+            selectRegion(d, this);
+          });
+
+        updatePositions();
+      }
+
+      // Select a region and show chart
+      function selectRegion(d, element) {
+        // Pause the globe
+        pauseRotation();
+        
+        // Update selected state
+        selectedRegion = d.name;
+        
+        // Reset all hotspots
+        hotspotGroup.selectAll(".hotspot")
+          .classed("selected", false)
+          .attr("fill", "#e07b39");
+        
+        // Highlight selected
+        d3.select(element)
+          .classed("selected", true)
+          .attr("fill", "#dc3545");
+        
+        // Calculate stats
+        const latest = d.timeSeries[d.timeSeries.length - 1];
+        const first = d.timeSeries[0];
+        const forestLoss = first.forestCover - latest.forestCover;
+        const birdLoss = Math.round((1 - latest.birdSpecies / first.birdSpecies) * 100);
+        
+        // Update popup content
+        document.getElementById('popup-title').textContent = d.name;
+        document.getElementById('popup-stats').innerHTML = `
+          Forest loss: <span>${forestLoss}%</span> since 2000 | 
+          Bird species: <span>${latest.birdSpecies}</span> (↓${birdLoss}%)
+        `;
+        
+        // Position popup near the hotspot
+        const coords = projection([d.lon, d.lat]);
+        const popup = document.getElementById('chart-popup');
+        const wrapper = document.getElementById('globe-wrapper');
+        const wrapperRect = wrapper.getBoundingClientRect();
+        
+        // Calculate position - try to place it smartly
+        let popupX = coords[0] + 20;
+        let popupY = coords[1] - 100;
+        
+        // Adjust if too far right
+        if (popupX + 320 > width) {
+          popupX = coords[0] - 340;
+        }
+        
+        // Adjust if too high
+        if (popupY < 10) {
+          popupY = coords[1] + 20;
+        }
+        
+        // Adjust if too low
+        if (popupY + 250 > height) {
+          popupY = height - 260;
+        }
+        
+        popup.style.left = popupX + 'px';
+        popup.style.top = popupY + 'px';
+        
+        // Show popup and draw chart
+        popup.classList.add('visible');
+        drawChart(d);
+      }
+
+      // Close popup
+      function closePopup() {
+        document.getElementById('chart-popup').classList.remove('visible');
+        selectedRegion = null;
+        
+        // Reset hotspot colors
+        hotspotGroup.selectAll(".hotspot")
+          .classed("selected", false)
+          .attr("fill", "#e07b39");
+      }
+
+      // Pause rotation
+      function pauseRotation() {
+        if (rotationTimer) {
+          rotationTimer.stop();
+          rotationTimer = null;
+        }
+        isPaused = true;
+        document.getElementById('paused-indicator').classList.add('visible');
+      }
+
+      // Resume rotation
+      function resumeRotation() {
+        closePopup();
+        isPaused = false;
+        document.getElementById('paused-indicator').classList.remove('visible');
+        startRotation();
+      }
+
+      // Draw the chart
+      function drawChart(regionData) {
+        // Clear previous chart
+        d3.select("#chart").html("");
+        
+        const margin = { top: 15, right: 45, bottom: 30, left: 40 };
+        const chartWidth = 280 - margin.left - margin.right;
+        const chartHeight = 150 - margin.top - margin.bottom;
+        
+        const chartSvg = d3.select("#chart")
+          .append("svg")
+          .attr("width", chartWidth + margin.left + margin.right)
+          .attr("height", chartHeight + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left}, ${margin.top})`);
+        
+        const timeSeries = regionData.timeSeries;
+        
+        // Scales
+        const xScale = d3.scaleLinear()
+          .domain([2000, 2024])
+          .range([0, chartWidth]);
+        
+        const yScaleForest = d3.scaleLinear()
+          .domain([0, 100])
+          .range([chartHeight, 0]);
+        
+        const yScaleBirds = d3.scaleLinear()
+          .domain([0, d3.max(timeSeries, d => d.birdSpecies) * 1.1])
+          .range([chartHeight, 0]);
+        
+        // Grid lines
+        chartSvg.append("g")
+          .attr("class", "grid")
+          .selectAll("line")
+          .data(yScaleForest.ticks(4))
+          .enter()
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", chartWidth)
+          .attr("y1", d => yScaleForest(d))
+          .attr("y2", d => yScaleForest(d));
+        
+        // X axis
+        chartSvg.append("g")
+          .attr("class", "axis")
+          .attr("transform", `translate(0, ${chartHeight})`)
+          .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format("d")));
+        
+        // Y axis left (Forest Cover)
+        chartSvg.append("g")
+          .attr("class", "axis")
+          .call(d3.axisLeft(yScaleForest).ticks(4).tickFormat(d => d + "%"));
+        
+        // Y axis right (Bird Species)
+        chartSvg.append("g")
+          .attr("class", "axis")
+          .attr("transform", `translate(${chartWidth}, 0)`)
+          .call(d3.axisRight(yScaleBirds).ticks(4));
+        
+        // Area under forest line
+        const forestArea = d3.area()
+          .x(d => xScale(d.year))
+          .y0(chartHeight)
+          .y1(d => yScaleForest(d.forestCover))
+          .curve(d3.curveMonotoneX);
+        
+        chartSvg.append("path")
+          .datum(timeSeries)
+          .attr("fill", "rgba(224, 123, 57, 0.2)")
+          .attr("d", forestArea);
+        
+        // Forest cover line
+        const forestLine = d3.line()
+          .x(d => xScale(d.year))
+          .y(d => yScaleForest(d.forestCover))
+          .curve(d3.curveMonotoneX);
+        
+        chartSvg.append("path")
+          .datum(timeSeries)
+          .attr("fill", "none")
+          .attr("stroke", "#e07b39")
+          .attr("stroke-width", 2)
+          .attr("d", forestLine);
+        
+        // Forest cover dots
+        chartSvg.selectAll(".forest-dot")
+          .data(timeSeries)
+          .enter()
+          .append("circle")
+          .attr("class", "forest-dot")
+          .attr("cx", d => xScale(d.year))
+          .attr("cy", d => yScaleForest(d.forestCover))
+          .attr("r", 3)
+          .attr("fill", "#e07b39");
+        
+        // Bird species line
+        const birdLine = d3.line()
+          .x(d => xScale(d.year))
+          .y(d => yScaleBirds(d.birdSpecies))
+          .curve(d3.curveMonotoneX);
+        
+        chartSvg.append("path")
+          .datum(timeSeries)
+          .attr("fill", "none")
+          .attr("stroke", "#4a7c43")
+          .attr("stroke-width", 2)
+          .attr("d", birdLine);
+        
+        // Bird species dots
+        chartSvg.selectAll(".bird-dot")
+          .data(timeSeries)
+          .enter()
+          .append("circle")
+          .attr("class", "bird-dot")
+          .attr("cx", d => xScale(d.year))
+          .attr("cy", d => yScaleBirds(d.birdSpecies))
+          .attr("r", 3)
+          .attr("fill", "#4a7c43");
+      }
+
+      // Update hotspot positions
+      function updatePositions() {
+        hotspotGroup.selectAll(".hotspot-group")
+          .attr("transform", d => {
+            const coords = projection([d.lon, d.lat]);
+            return coords ? `translate(${coords[0]}, ${coords[1]})` : "translate(-1000,-1000)";
+          })
+          .attr("visibility", d => {
+            const r = projection.rotate();
+            const distance = d3.geoDistance([d.lon, d.lat], [-r[0], -r[1]]);
+            return distance < Math.PI / 2 ? "visible" : "hidden";
+          });
+      }
+
+      // Drag to rotate
+      const drag = d3.drag()
+        .on("start", () => { 
+          if (rotationTimer) rotationTimer.stop(); 
+        })
+        .on("drag", (event) => {
+          const r = projection.rotate();
+          projection.rotate([r[0] + event.dx * 0.5, r[1] - event.dy * 0.5]);
+          updateMap();
+          
+          // Update popup position if visible
+          if (selectedRegion) {
+            const region = data.regions.find(r => r.name === selectedRegion);
+            if (region) {
+              const coords = projection([region.lon, region.lat]);
+              const popup = document.getElementById('chart-popup');
+              
+              // Check if hotspot is visible
+              const r = projection.rotate();
+              const distance = d3.geoDistance([region.lon, region.lat], [-r[0], -r[1]]);
+              
+              if (distance < Math.PI / 2) {
+                let popupX = coords[0] + 20;
+                let popupY = coords[1] - 100;
+                if (popupX + 320 > width) popupX = coords[0] - 340;
+                if (popupY < 10) popupY = coords[1] + 20;
+                if (popupY + 250 > height) popupY = height - 260;
+                
+                popup.style.left = popupX + 'px';
+                popup.style.top = popupY + 'px';
+              } else {
+                // Hide popup when hotspot is on back of globe
+                popup.classList.remove('visible');
+              }
+            }
+          }
+        })
+        .on("end", () => { 
+          if (!isPaused) {
+            startRotation(); 
+          }
+        });
+
+      svg.call(drag);
+
+      // Update all map elements
+      function updateMap() {
+        svg.selectAll(".country").attr("d", path);
+        landGroup.selectAll("path").attr("d", path);
+        updatePositions();
+      }
+
+      // Auto rotation
+      let rotationTimer;
+      function startRotation() {
+        if (isPaused) return;
+        
+        rotationTimer = d3.timer(() => {
+          const r = projection.rotate();
+          projection.rotate([r[0] + 0.3, r[1]]);
+          updateMap();
+        });
+      }
+      
+      startRotation();
+    </script>
+  </body>
+</html>
