@@ -1,45 +1,54 @@
-# The Trees - Deforestation Globe Visualization
+# The Trees - Deforestation Visualization
 
-A D3.js visualization showing global deforestation hotspots.
+Interactive D3.js globe visualization showing global deforestation hotspots.
 
 ## Project Structure
 
 ```
 The-Trees/
-├── globe.html          # Main globe visualization
+├── index.html              # Main HTML (contains visualization divs)
 ├── css/
-│   └── style.css       # Styling
+│   ├── style.css           # Global/shared styles
+│   └── globeVis.css        # Globe-specific styles (prefix: globe-)
 ├── js/
-│   └── main.js         # JavaScript
+│   ├── main.js             # Entry point, initializes visualizations
+│   └── globeVis.js         # Globe visualization class
+├── data/
+│   └── deforestation.csv   # Deforestation data by region
 └── README.md
 ```
 
-## Features
+## Adding New Visualizations
 
-- Interactive 3D rotating globe
-- Deforestation hotspots with severity indicators
-- Drag to rotate
-- Hover for regional details
-- Auto-rotation when idle
+Each visualization should:
+1. Have its own `.js` file in `js/` folder
+2. Have its own `.css` file in `css/` folder
+3. Use unique CSS class prefixes (e.g., `globe-`, `chart-`, `map-`)
+4. Be contained in a specific `<div>` block in `index.html`
+5. Load data from `data/` folder
 
-## Data
+## Data Format
 
-Regions tracked:
-- Amazon (30% forest loss)
-- Congo Basin (23% forest loss)
-- Southeast Asia (45% forest loss)
-- Central America (28% forest loss)
-- Madagascar (43% forest loss)
+`data/deforestation.csv`:
+```csv
+region,lat,lon,year,forestCover,birdSpecies
+Amazon,-3.4653,-62.2159,2000,100,1300
+...
+```
 
-## To Run
+## Running Locally
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open http://localhost:8000/globe.html
+Open http://localhost:8000
 
-## Technology
+## CSS Class Naming
 
-- D3.js v7
-- TopoJSON for world map
+All globe classes use `globe-` prefix:
+- `.globe-container`
+- `.globe-hotspot`
+- `.globe-popup`
+- `.globe-visible`
+- etc.
