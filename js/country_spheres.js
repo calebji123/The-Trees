@@ -99,7 +99,7 @@ const latRange = [74, -48];
 function projectX(lng) { return svgMargin.left + ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * W; }
 function projectY(lat) { return svgMargin.top + ((latRange[0] - lat) / (latRange[0] - latRange[1])) * H; }
 
-const svg = d3.select('#viz')
+const svg = d3.select('#cs-viz')
   .attr('width', W + svgMargin.left + svgMargin.right)
   .attr('height', H + svgMargin.top + svgMargin.bottom);
 const bubbleG = svg.append('g');
@@ -150,10 +150,10 @@ function shortName(name) {
 // LEGEND
 // ════════════════════════════════════════════
 function buildLegend() {
-  const leg = d3.select('#legend');
+  const leg = d3.select('#cs-legend');
   Object.entries(CONTINENT_META).forEach(([name, color]) => {
-    const item = leg.append('div').attr('class','legend-item');
-    item.append('div').attr('class','legend-dot').style('background', color);
+    const item = leg.append('div').attr('class','cs-legend-item');
+    item.append('div').attr('class','cs-legend-dot').style('background', color);
     item.append('span').text(name);
   });
 }
@@ -211,7 +211,7 @@ function initSimulation() {
 }
 
 function onSimTick() {
-  bubbleG.selectAll('.bg').attr('transform', d => {
+  bubbleG.selectAll('.cs-bg').attr('transform', d => {
     const node = simNodeMap[d.country];
     if (node) { d.px = node.x; d.py = node.y; }
     return `translate(${d.px},${d.py})`;
@@ -256,30 +256,30 @@ function updateViz(year) {
   const topN = W < 600 ? 12 : 30;
   const labelSet = new Set(data.slice(0, topN).map(d => d.country));
 
-  const sel = bubbleG.selectAll('.bg').data(data, d => d.country);
+  const sel = bubbleG.selectAll('.cs-bg').data(data, d => d.country);
   sel.exit().transition().duration(300).attr('opacity', 0).remove();
 
-  const enter = sel.enter().append('g').attr('class','bg')
+  const enter = sel.enter().append('g').attr('class','cs-bg')
     .attr('opacity', 0).style('cursor','pointer')
     .on('click', (e, d) => openDetail(d.country))
     .on('mouseenter', showTooltip).on('mousemove', showTooltip)
     .on('mouseleave', hideTooltip);
 
-  enter.append('circle').attr('class','bc');
-  enter.append('text').attr('class','bname')
+  enter.append('circle').attr('class','cs-bc');
+  enter.append('text').attr('class','cs-bname')
     .attr('text-anchor','middle').attr('pointer-events','none')
     .attr('font-weight', 600).attr('font-family','Source Sans 3, sans-serif');
-  enter.append('text').attr('class','binfo')
+  enter.append('text').attr('class','cs-binfo')
     .attr('text-anchor','middle').attr('pointer-events','none')
     .attr('font-family','IBM Plex Mono, monospace');
-  enter.append('text').attr('class','btrend')
+  enter.append('text').attr('class','cs-btrend')
     .attr('text-anchor','middle').attr('pointer-events','none');
 
   const merged = enter.merge(sel);
   enter.attr('transform', d => `translate(${d.px},${d.py})`);
   merged.transition().duration(300).attr('opacity', 1);
 
-  merged.select('.bc').transition().duration(350)
+  merged.select('.cs-bc').transition().duration(350)
     .attr('r', d => d.r)
     .attr('fill', d => CONTINENT_META[d.cont] || '#888')
     .attr('fill-opacity', 0.18)
@@ -287,19 +287,19 @@ function updateViz(year) {
     .attr('stroke-opacity', 0.7)
     .attr('stroke-width', d => d.r > 8 ? 1.5 : 0.8);
 
-  merged.select('.bname')
+  merged.select('.cs-bname')
     .text(d => labelSet.has(d.country) && d.r > 12 ? shortName(d.country) : '')
     .attr('dy', d => d.r > 22 ? '-0.5em' : '-0.15em')
     .attr('font-size', d => Math.max(5.5, Math.min(11, d.r * 0.38)) + 'px')
     .attr('fill', d => CONTINENT_META[d.cont] || '#3d3229');
 
-  merged.select('.binfo')
+  merged.select('.cs-binfo')
     .text(d => labelSet.has(d.country) && d.r > 20 ? `${formatValShort(d.val, currentMetric)} #${d.rank}` : '')
     .attr('dy', '0.65em')
     .attr('font-size', d => Math.max(5, Math.min(8, d.r * 0.28)) + 'px')
     .attr('fill', '#6b5d50');
 
-  merged.select('.btrend')
+  merged.select('.cs-btrend')
     .text(d => {
       if (!labelSet.has(d.country) || d.r < 26) return '';
       return d.trend === 'up' ? '\u25B2' : d.trend === 'down' ? '\u25BC' : '\u2014';
@@ -313,23 +313,23 @@ function updateViz(year) {
 // TOOLTIP
 // ════════════════════════════════════════════
 function showTooltip(event, d) {
-  const tip = d3.select('#tooltip');
+  const tip = d3.select('#cs-tooltip');
   const trendStr = d.trend === 'up' ? '\u25B2 Rising' : d.trend === 'down' ? '\u25BC Falling' : '\u2014 Stable';
   const trendColor = d.trend === 'up' ? '#c45d3e' : d.trend === 'down' ? '#2d6a4f' : '#9a8d80';
   const mLabel = currentMetric === 'per_capita' ? 'CO\u2082/capita' : 'Total CO\u2082';
   tip.html(`
-    <div class="tt-name" style="color:${CONTINENT_META[d.cont]}">${d.country}</div>
-    <div class="tt-row">${mLabel}: <span class="tt-val">${formatVal(d.val, currentMetric)}</span></div>
-    <div class="tt-row">Global rank: <span class="tt-val">#${d.rank}</span></div>
-    <div class="tt-row">5yr trend: <span class="tt-val" style="color:${trendColor}">${trendStr}</span></div>
-    <div class="tt-row">Region: <span class="tt-val">${d.cont}</span></div>
-    <div class="tt-click">Click for full trend \u2192</div>
+    <div class="cs-tt-name" style="color:${CONTINENT_META[d.cont]}">${d.country}</div>
+    <div class="cs-tt-row">${mLabel}: <span class="cs-tt-val">${formatVal(d.val, currentMetric)}</span></div>
+    <div class="cs-tt-row">Global rank: <span class="cs-tt-val">#${d.rank}</span></div>
+    <div class="cs-tt-row">5yr trend: <span class="cs-tt-val" style="color:${trendColor}">${trendStr}</span></div>
+    <div class="cs-tt-row">Region: <span class="cs-tt-val">${d.cont}</span></div>
+    <div class="cs-tt-click">Click for full trend \u2192</div>
   `);
   tip.style('left', (event.clientX + 16) + 'px')
      .style('top', (event.clientY - 10) + 'px')
      .style('opacity', 1);
 }
-function hideTooltip() { d3.select('#tooltip').style('opacity', 0); }
+function hideTooltip() { d3.select('#cs-tooltip').style('opacity', 0); }
 
 // ════════════════════════════════════════════
 // DETAIL PANEL
@@ -337,9 +337,9 @@ function hideTooltip() { d3.select('#tooltip').style('opacity', 0); }
 function openDetail(country) {
   detailCountry = country;
   detailMetric = currentMetric;
-  document.querySelectorAll('.detail-mbtn').forEach(b => b.classList.toggle('active', b.dataset.dm === detailMetric));
-  document.getElementById('detail-overlay').classList.add('open');
-  document.getElementById('detail-panel').classList.add('open');
+  document.querySelectorAll('.cs-detail-mbtn').forEach(b => b.classList.toggle('active', b.dataset.dm === detailMetric));
+  document.getElementById('cs-detail-overlay').classList.add('open');
+  document.getElementById('cs-detail-panel').classList.add('open');
   drawDetailChart();
 }
 
@@ -352,16 +352,16 @@ function drawDetailChart() {
   const mLabel = metricLabel(detailMetric);
   const mUnit = metricUnit(detailMetric);
 
-  document.getElementById('detail-name').textContent = country;
-  document.getElementById('detail-name').style.color = color;
-  document.getElementById('detail-sub').textContent = `${geo?.cont || ''} \u00B7 ${mLabel} over time`;
+  document.getElementById('cs-detail-name').textContent = country;
+  document.getElementById('cs-detail-name').style.color = color;
+  document.getElementById('cs-detail-sub').textContent = `${geo?.cont || ''} \u00B7 ${mLabel} over time`;
 
   const countryData = source[country];
   if (!countryData) return;
   const years = Object.keys(countryData).map(Number).sort((a,b) => a-b);
   const values = years.map(y => ({ year: y, val: countryData[y] }));
 
-  const chartSvg = d3.select('#detail-chart');
+  const chartSvg = d3.select('#cs-detail-chart');
   chartSvg.selectAll('*').remove();
   const cM = { top: 20, right: 16, bottom: 36, left: 52 };
   const cw = Math.min(420, window.innerWidth - 80) - cM.left - cM.right;
@@ -408,24 +408,24 @@ function drawDetailChart() {
 }
 
 function closeDetail() {
-  document.getElementById('detail-overlay').classList.remove('open');
-  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('cs-detail-overlay').classList.remove('open');
+  document.getElementById('cs-detail-panel').classList.remove('open');
   detailCountry = null;
 }
 
 // ════════════════════════════════════════════
 // CONTROLS
 // ════════════════════════════════════════════
-document.querySelectorAll('.metric-btn').forEach(btn => {
+document.querySelectorAll('.cs-metric-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.dataset.metric === currentMetric) return;
-    document.querySelectorAll('.metric-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cs-metric-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentMetric = btn.dataset.metric;
     simNodeMap = {}; simNodes = [];
     if (simulation) simulation.stop();
     initSimulation();
-    document.getElementById('main-title').innerHTML =
+    document.getElementById('cs-main-title').innerHTML =
       currentMetric === 'per_capita'
         ? 'Our Warming World<br><em>CO\u2082 Per Capita</em>'
         : 'Our Warming World<br><em>Total CO\u2082 Emissions</em>';
@@ -433,18 +433,18 @@ document.querySelectorAll('.metric-btn').forEach(btn => {
   });
 });
 
-document.querySelectorAll('.detail-mbtn').forEach(btn => {
+document.querySelectorAll('.cs-detail-mbtn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.detail-mbtn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cs-detail-mbtn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     detailMetric = btn.dataset.dm;
     drawDetailChart();
   });
 });
 
-const slider = document.getElementById('year-slider');
-const yearDisp = document.getElementById('year-display');
-const playBtn = document.getElementById('play-btn');
+const slider = document.getElementById('cs-year-slider');
+const yearDisp = document.getElementById('cs-year-display');
+const playBtn = document.getElementById('cs-play-btn');
 
 let sliderRaf = null;
 slider.addEventListener('input', () => {
@@ -476,9 +476,9 @@ function stopPlay() {
   clearInterval(animInterval);
 }
 
-document.querySelectorAll('.speed-btn').forEach(btn => {
+document.querySelectorAll('.cs-speed-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cs-speed-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     speed = +btn.dataset.speed;
     if (playing) { clearInterval(animInterval); startPlay(); }
@@ -487,7 +487,7 @@ document.querySelectorAll('.speed-btn').forEach(btn => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDetail();
-  if (e.key === ' ' && !e.target.closest('#detail-panel')) { e.preventDefault(); playing ? stopPlay() : startPlay(); }
+  if (e.key === ' ' && !e.target.closest('#cs-detail-panel')) { e.preventDefault(); playing ? stopPlay() : startPlay(); }
   if (e.key === 'ArrowRight' && !playing) { currentYear = Math.min(2023, currentYear+1); slider.value = currentYear; yearDisp.textContent = currentYear; updateViz(currentYear); }
   if (e.key === 'ArrowLeft' && !playing) { currentYear = Math.max(1950, currentYear-1); slider.value = currentYear; yearDisp.textContent = currentYear; updateViz(currentYear); }
 });
