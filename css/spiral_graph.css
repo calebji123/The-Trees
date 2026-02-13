@@ -1,0 +1,148 @@
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	--spiral-ink: #101820;
+	--spiral-muted: #5b6b7a;
+	--spiral-paper: #f4f1ec;
+	--spiral-accent: #ff6b4a;
+	--spiral-cool: #2a7bbd;
+	--spiral-warm: #c82838;
+}
+
+
+
+.spiral-page {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 3rem 1.5rem 4rem;
+}
+
+.spiral-hero {
+	text-align: left;
+	margin-bottom: 2rem;
+}
+
+.spiral-eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	font-size: 0.75rem;
+	color: var(--spiral-muted);
+	margin: 0;
+}
+
+.spiral-lede {
+	max-width: 640px;
+	font-size: 1.05rem;
+	color: var(--spiral-muted);
+	margin: 0;
+}
+
+.spiral-card {
+	position: relative;
+	background: #ffffffc9;
+	border-radius: 24px;
+	padding: 2rem 2rem 2.5rem;
+	box-shadow: 0 30px 70px rgba(16, 24, 32, 0.12);
+	backdrop-filter: blur(8px);
+}
+
+.spiral-meta {
+	display: flex;
+	gap: 1.5rem;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1.5rem;
+}
+
+.spiral-legend {
+	display: grid;
+	gap: 0.35rem;
+	min-width: 220px;
+}
+
+.spiral-legend-label {
+	font-size: 0.85rem;
+	color: var(--spiral-muted);
+}
+
+.spiral-legend-bar {
+	height: 12px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--spiral-cool), #f6d365, var(--spiral-warm));
+}
+
+.spiral-legend-range {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.8rem;
+	color: var(--spiral-muted);
+}
+
+.spiral-note {
+	font-size: 0.85rem;
+	color: var(--spiral-muted);
+}
+
+#spiral_graph {
+	width: 100%;
+	height: min(82vh, 860px);
+	display: block;
+}
+
+#timeline_graph {
+	width: 100%;
+	height: 70px;
+	display: block;
+	margin-top: 0.5rem;
+}
+
+.timeline-controls {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+	font-size: 0.9rem;
+	color: var(--muted);
+}
+
+.timeline-value {
+	min-width: 3.2rem;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.spiral-tooltip {
+	position: fixed;
+	pointer-events: none;
+	background: #101820;
+	color: #fff;
+	padding: 0.45rem 0.75rem;
+	border-radius: 12px;
+	font-size: 0.8rem;
+	opacity: 0;
+	transform: translate(-50%, -120%);
+	transition: opacity 0.15s ease;
+	white-space: nowrap;
+}
+
+.spiral-tooltip.is-visible {
+	opacity: 1;
+}
+
+@media (max-width: 720px) {
+	.spiral-page {
+		padding: 2.5rem 1rem 3rem;
+	}
+
+	.spiral-card {
+		padding: 1.5rem 1.2rem 2rem;
+	}
+
+	#spiral_graph {
+		height: 70vh;
+	}
+}
