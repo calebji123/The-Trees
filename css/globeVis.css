@@ -1,0 +1,189 @@
+/* =====================
+   Globe Visualization Styles
+   Prefix: globe-
+   ===================== */
+
+/* Container */
+#globe-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a1628 0%, #1a2f4a 100%);
+  color: #dde;
+}
+
+/* Title */
+.globe-title {
+  font-size: 2rem;
+  color: #4a7c43;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.globe-subtitle {
+  font-size: 1rem;
+  color: #88a;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.globe-wrapper {
+  position: relative;
+}
+
+.globe-container {
+  background: #0a1628;
+  border-radius: 12px;
+  border: 1px solid #1a3a5c;
+}
+
+/* Hotspots */
+.globe-hotspot {
+  fill: #e07b39;
+  stroke: #fff;
+  stroke-width: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.globe-hotspot:hover {
+  fill: #dc3545;
+}
+
+.globe-hotspot.globe-selected {
+  fill: #dc3545;
+  stroke: #fff;
+  stroke-width: 3px;
+}
+
+.globe-hotspot-pulse {
+  fill: #e07b39;
+  opacity: 0.3;
+}
+
+/* Paused Indicator */
+.globe-paused-indicator {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #88a;
+  display: none;
+}
+
+.globe-paused-indicator.globe-visible {
+  display: block;
+}
+
+.globe-resume-btn {
+  background: #4a7c43;
+  border: none;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 4px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.globe-resume-btn:hover {
+  background: #5a9c53;
+}
+
+/* Chart Popup */
+.globe-popup {
+  position: absolute;
+  background: rgba(10, 22, 40, 0.95);
+  border: 2px solid #4a7c43;
+  border-radius: 12px;
+  padding: 15px;
+  display: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  min-width: 320px;
+}
+
+.globe-popup.globe-visible {
+  display: block;
+}
+
+.globe-popup h4 {
+  color: #4a7c43;
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.globe-popup-stats {
+  font-size: 12px;
+  color: #88a;
+  margin-bottom: 10px;
+}
+
+.globe-popup-stats span {
+  color: #e07b39;
+  font-weight: bold;
+}
+
+#globe-chart {
+  min-height: 195px;
+  width: 100%;
+}
+
+.globe-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #88a;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.globe-close-btn:hover {
+  color: #fff;
+}
+
+/* Chart Elements */
+.globe-axis text {
+  fill: #88a;
+  font-size: 10px;
+}
+
+.globe-axis line,
+.globe-axis path {
+  stroke: #334;
+}
+
+.globe-grid line {
+  stroke: #223;
+  stroke-opacity: 0.5;
+}
+
+/* Chart Legend */
+.globe-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.globe-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.globe-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
