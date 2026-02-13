@@ -15,7 +15,7 @@
       crossorigin="anonymous"
     />
 
-    <!-- custom css included -->
+    <!-- Country Spheres visualization styles -->
     <link rel="stylesheet" href="css/country_sphere_styles.css" />
 
     <!-- GOOGLE FONTS -->
@@ -38,51 +38,10 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Add content -->
-    <div class="cs-wrapper">
-     <div id="cs-header">
-      <h1 id="cs-main-title">Our Warming World<br><em>CO₂ Per Capita</em></h1>
-      <p>Each bubble represents a country — sized by emissions, positioned geographically, colored by continent. Click any country for its full story.</p>
-    </div>
+    <!-- Country Spheres Visualization Container -->
+    <div id="country-spheres"></div>
 
-    <div id="cs-metric-toggle">
-      <button class="cs-metric-btn active" data-metric="per_capita">Per Capita</button>
-      <button class="cs-metric-btn" data-metric="total">Total Emissions</button>
-    </div>
-
-    <div id="cs-controls">
-      <button class="cs-btn" id="cs-play-btn">▶ Play</button>
-      <input type="range" id="cs-year-slider" min="1950" max="2023" value="2023" step="1">
-      <div id="cs-year-display">2023</div>
-      <div id="cs-speed-controls">
-        <button class="cs-btn cs-speed-btn" data-speed="250">1×</button>
-        <button class="cs-btn cs-speed-btn active" data-speed="120">2×</button>
-        <button class="cs-btn cs-speed-btn" data-speed="50">5×</button>
-      </div>
-    </div>
-
-    <div id="cs-legend"></div>
-
-    <div id="cs-viz-container">
-      <svg id="cs-viz"></svg>
-    </div>
-
-    <div id="cs-tooltip"></div>
-
-    <div id="cs-detail-overlay" onclick="closeDetail()"></div>
-    <div id="cs-detail-panel">
-      <button class="cs-close-btn" onclick="closeDetail()">✕</button>
-      <h2 id="cs-detail-name"></h2>
-      <div class="cs-detail-sub" id="cs-detail-sub"></div>
-      <div id="cs-detail-metric-toggle">
-        <button class="cs-detail-mbtn active" data-dm="per_capita">Per Capita</button>
-        <button class="cs-detail-mbtn" data-dm="total">Total</button>
-      </div>
-      <svg id="cs-detail-chart"></svg>
-    </div>
-    </div>
-
-    <!-- d3 included -->
+    <!-- D3 and visualization script -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="js/country_spheres.js"></script>
   </body>
