@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Boilerplate D3</title>
+    <title>Spiral of Global Temperature Anomalies</title>
 
     <!-- Load CSS libraries -->
     <!-- Add Bootstrap css -->
@@ -17,8 +17,13 @@
 
     <!-- custom css included -->
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/spiral_graph.css" />
 
     <!-- GOOGLE FONTS -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,400italic,300italic"
       rel="stylesheet"
@@ -38,10 +43,29 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Add content -->
+    <!-- Add spiral graph -->
+    <section class="spiral-page">
+      <section class="spiral-card">
+        <svg
+          id="spiral_graph"
+          aria-label="Spiral graph of global temperature anomalies"
+        ></svg>
+        <svg
+          id="timeline_graph"
+          aria-label="Timeline for global temperature anomalies"
+        ></svg>
+        <div
+          id="tooltip"
+          class="spiral-tooltip"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </section>
+    </section>
 
     <!-- d3 included -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/spiral_graph.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>
