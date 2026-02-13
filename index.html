@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Boilerplate D3</title>
+    <title>Global Deforestation Hotspots</title>
 
     <!-- Load CSS libraries -->
     <!-- Add Bootstrap css -->
@@ -15,8 +15,7 @@
       crossorigin="anonymous"
     />
 
-    <!-- custom css included -->
-    <link rel="stylesheet" href="css/style.css" />
+    <!-- Globe visualization styles -->
     <link rel="stylesheet" href="css/globeVis.css" />
 
     <!-- GOOGLE FONTS -->
@@ -39,47 +38,12 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Add content -->
+    <!-- Globe Visualization Container -->
+    <div id="globe-section"></div>
 
-    <!-- =====================
-         Globe Visualization (Abby)
-         ===================== -->
-    <div id="globe-section">
-      <h1>Global Deforestation Hotspots</h1>
-      <p class="subtitle">Drag to rotate. Click a hotspot to see historical data.</p>
-      
-      <div class="globe-wrapper">
-        <div id="globe-container" class="globe-container"></div>
-        
-        <div id="globe-popup" class="globe-popup">
-          <button class="globe-close-btn" onclick="globeVis.closePopup()">&times;</button>
-          <h4 id="globe-popup-title"></h4>
-          <div class="globe-popup-stats" id="globe-popup-stats"></div>
-          <div id="globe-chart"></div>
-          <div class="globe-chart-legend">
-            <div class="globe-legend-item">
-              <div class="globe-legend-color" style="background: #e07b39;"></div>
-              <span>Forest Cover %</span>
-            </div>
-            <div class="globe-legend-item">
-              <div class="globe-legend-color" style="background: #4a7c43;"></div>
-              <span>Bird Species</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="globe-paused-indicator" id="globe-paused">
-          ⏸ Globe paused
-          <button class="globe-resume-btn" onclick="globeVis.resume()">Resume</button>
-        </div>
-      </div>
-    </div>
-    <!-- End Globe Visualization -->
-
-    <!-- d3 included -->
+    <!-- D3 and visualization script -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
     <script src="js/globeVis.js"></script>
-    <script src="js/main.js"></script>
   </body>
 </html>

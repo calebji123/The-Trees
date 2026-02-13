@@ -21,6 +21,9 @@ class GlobeVis {
    * Initialize the visualization
    */
   async init() {
+    // Build HTML structure
+    this.buildHTML();
+    
     // Load data from CSV
     await this.loadData();
     
@@ -35,6 +38,48 @@ class GlobeVis {
     
     // Start auto-rotation
     this.startRotation();
+  }
+  
+  /**
+   * Build HTML structure dynamically
+   */
+  buildHTML() {
+    const container = document.getElementById(this.containerId);
+    container.innerHTML = `
+      <h1 class="globe-title">Global Deforestation Hotspots</h1>
+      <p class="globe-subtitle">Drag to rotate. Click a hotspot to see historical data.</p>
+      
+      <div class="globe-wrapper">
+        <div id="globe-container" class="globe-container"></div>
+        
+        <div id="globe-popup" class="globe-popup">
+          <button class="globe-close-btn">&times;</button>
+          <h4 id="globe-popup-title"></h4>
+          <div class="globe-popup-stats" id="globe-popup-stats"></div>
+          <div id="globe-chart"></div>
+          <div class="globe-chart-legend">
+            <div class="globe-legend-item">
+              <div class="globe-legend-color" style="background: #e07b39;"></div>
+              <span>Forest Cover %</span>
+            </div>
+            <div class="globe-legend-item">
+              <div class="globe-legend-color" style="background: #4a7c43;"></div>
+              <span>Bird Species</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="globe-paused-indicator" id="globe-paused">
+          ⏸ Globe paused
+          <button class="globe-resume-btn">Resume</button>
+        </div>
+      </div>
+    `;
+    
+    // Add event listeners
+    const self = this;
+    container.querySelector('.globe-close-btn').addEventListener('click', () => self.closePopup());
+    container.querySelector('.globe-resume-btn').addEventListener('click', () => self.resume());
   }
   
   /**
@@ -469,3 +514,10 @@ class GlobeVis {
     this.svg.call(drag);
   }
 }
+
+// Initialize on page load
+let globeVis;
+document.addEventListener('DOMContentLoaded', () => {
+  globeVis = new GlobeVis('globe-section');
+  globeVis.init();
+});

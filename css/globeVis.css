@@ -8,6 +8,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a1628 0%, #1a2f4a 100%);
+  color: #dde;
+}
+
+/* Title */
+.globe-title {
+  font-size: 2rem;
+  color: #4a7c43;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.globe-subtitle {
+  font-size: 1rem;
+  color: #88a;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 .globe-wrapper {

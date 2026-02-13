@@ -8,11 +8,9 @@ Interactive D3.js globe showing global deforestation hotspots.
 The-Trees/
 ├── index.html
 ├── css/
-│   ├── style.css        # Global styles
 │   └── globeVis.css     # Globe styles (prefix: globe-)
 ├── js/
-│   ├── main.js          # Entry point
-│   └── globeVis.js      # Globe class
+│   └── globeVis.js      # Globe visualization
 └── data/
     └── deforestation.csv
 ```
