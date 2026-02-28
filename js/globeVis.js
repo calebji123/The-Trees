@@ -59,11 +59,11 @@ class GlobeVis {
           <div id="globe-chart"></div>
           <div class="globe-chart-legend">
             <div class="globe-legend-item">
-              <div class="globe-legend-color" style="background: #e07b39;"></div>
+              <div class="globe-legend-color" style="background: #c45d3e;"></div>
               <span>Forest Cover %</span>
             </div>
             <div class="globe-legend-item">
-              <div class="globe-legend-color" style="background: #4a7c43;"></div>
+              <div class="globe-legend-color" style="background: #2d6a4f;"></div>
               <span>Bird Species</span>
             </div>
           </div>
@@ -104,13 +104,18 @@ class GlobeVis {
         }))
       }));
       
-      // Calculate forest loss for each region
+      // Calculate forest loss and intensity for each region
+      let maxForestLoss = 0;
       this.data.forEach(r => {
         const latest = r.timeSeries[r.timeSeries.length - 1];
         const first = r.timeSeries[0];
         r.forestLoss = first.forestCover - latest.forestCover;
+        if (r.forestLoss > maxForestLoss) maxForestLoss = r.forestLoss;
       });
-      
+      this.maxForestLoss = maxForestLoss || 1;
+      this.data.forEach(r => {
+        r.intensity = r.forestLoss / this.maxForestLoss; // 0–1, how bad relative to worst
+      });
       console.log('Processed data:', this.data);
     } catch (error) {
       console.error('Error loading CSV:', error);
@@ -147,18 +152,23 @@ class GlobeVis {
           ]
         }
       ];
+      this.maxForestLoss = Math.max(...this.data.map(r => r.forestLoss), 1);
+      this.data.forEach(r => { r.intensity = r.forestLoss / this.maxForestLoss; });
       console.log('Using fallback data:', this.data);
     }
   }
   
   /**
-   * Setup SVG and projection
+   * Setup SVG and projection (append inside globe-container so popup positions correctly)
    */
   setupSvg() {
-    this.svg = d3.select(`#${this.containerId}`)
+    const container = document.getElementById('globe-container');
+    if (!container) return;
+    this.svg = d3.select('#globe-container')
       .append('svg')
       .attr('width', this.width)
-      .attr('height', this.height);
+      .attr('height', this.height)
+      .attr('aria-label', 'Globe with deforestation hotspots');
     
     // Orthographic projection for 3D globe
     this.projection = d3.geoOrthographic()
@@ -169,12 +179,13 @@ class GlobeVis {
     
     this.path = d3.geoPath().projection(this.projection);
     
-    // Ocean
+    // Ocean – soft blue-green to match cream page
     this.svg.append('circle')
       .attr('cx', this.width / 2)
       .attr('cy', this.height / 2)
       .attr('r', 280)
-      .attr('fill', '#1a3a5c');
+      .attr('fill', '#4da8c4')
+      .attr('opacity', 0.25);
     
     // Graticule (grid lines)
     const graticule = d3.geoGraticule();
@@ -182,9 +193,8 @@ class GlobeVis {
       .datum(graticule)
       .attr('d', this.path)
       .attr('fill', 'none')
-      .attr('stroke', '#2a4a6c')
-      .attr('stroke-width', 0.5)
-      .attr('stroke-opacity', 0.4);
+      .attr('stroke', 'rgba(61,50,41,0.12)')
+      .attr('stroke-width', 0.5);
     
     // Groups for layering
     this.landGroup = this.svg.append('g');
@@ -192,71 +202,90 @@ class GlobeVis {
   }
   
   /**
-   * Load and draw world map
+   * Load and draw world map (with error handling so hotspots still show)
    */
   loadMap() {
+    const self = this;
     d3.json('https://unpkg.com/world-atlas@2/countries-110m.json')
       .then(world => {
+        if (!world || !world.objects) throw new Error('Invalid world atlas');
         const countries = topojson.feature(world, world.objects.countries);
-        
-        this.landGroup.selectAll('.globe-country')
+        self.landGroup.selectAll('.globe-country')
           .data(countries.features)
           .enter()
           .append('path')
           .attr('class', 'globe-country')
-          .attr('d', this.path)
-          .attr('fill', '#2d5a27')
-          .attr('stroke', '#1a3518')
+          .attr('d', self.path)
+          .attr('fill', '#2d6a4f')
+          .attr('stroke', 'rgba(61,50,41,0.15)')
           .attr('stroke-width', 0.5);
-        
-        this.drawHotspots();
+        self.drawHotspots();
+      })
+      .catch(err => {
+        console.warn('Globe: world atlas failed, drawing hotspots only.', err);
+        self.drawHotspots();
       });
   }
   
   /**
-   * Draw deforestation hotspots
+   * Draw deforestation hotspots as animated fires (intensity = relative severity)
    */
   drawHotspots() {
     const self = this;
-    
-    console.log('Drawing hotspots for', this.data.length, 'regions:', this.data);
-    
+    if (!this.data || this.data.length === 0) return;
+    const maxR = 28;
+    const minR = 12;
+    const scaleR = d => minR + (maxR - minR) * (d.intensity ?? 0.5);
+
     const hotspots = this.hotspotGroup.selectAll('.globe-hotspot-group')
       .data(this.data)
       .enter()
       .append('g')
-      .attr('class', 'globe-hotspot-group');
-    
-    // Pulse effect
+      .attr('class', 'globe-hotspot-group')
+      .style('cursor', 'pointer');
+
+    // Animated fire: outer glow
     hotspots.append('circle')
-      .attr('class', 'globe-hotspot-pulse')
-      .attr('r', 20)
-      .attr('fill', '#e07b39')
-      .attr('opacity', 0.3);
-    
-    // Main hotspot circle
+      .attr('class', 'globe-fire-glow')
+      .attr('r', d => scaleR(d) * 1.4)
+      .attr('fill', '#c45d3e')
+      .attr('opacity', 0.35);
+    // Middle flame
+    hotspots.append('circle')
+      .attr('class', 'globe-fire-flame')
+      .attr('r', d => scaleR(d) * 0.85)
+      .attr('fill', '#d4860b')
+      .attr('opacity', 0.7);
+    // Inner core
+    hotspots.append('circle')
+      .attr('class', 'globe-fire-core')
+      .attr('r', d => scaleR(d) * 0.5)
+      .attr('fill', '#f4a261')
+      .attr('opacity', 0.95);
+
+    // Hit target and selection ring
     hotspots.append('circle')
       .attr('class', 'globe-hotspot')
-      .attr('r', d => 8 + (d.forestLoss / 5))
-      .attr('fill', '#e07b39')
-      .attr('stroke', '#fff')
+      .attr('r', d => scaleR(d) + 4)
+      .attr('fill', 'transparent')
+      .attr('stroke', 'none')
       .attr('stroke-width', 2)
-      .style('cursor', 'pointer')
       .on('mouseover', function(event, d) {
         if (self.selectedRegion !== d.name) {
-          d3.select(this).attr('fill', '#dc3545');
+          self.hotspotGroup.selectAll('.globe-hotspot').attr('stroke', 'none');
+          d3.select(this).attr('stroke', '#3d3229').attr('stroke-width', 2);
         }
       })
       .on('mouseout', function(event, d) {
         if (self.selectedRegion !== d.name) {
-          d3.select(this).attr('fill', '#e07b39');
+          d3.select(this).attr('stroke', 'none');
         }
       })
       .on('click', function(event, d) {
         event.stopPropagation();
         self.selectRegion(d, this);
       });
-    
+
     this.updatePositions();
   }
   
@@ -285,15 +314,13 @@ class GlobeVis {
     this.pause();
     this.selectedRegion = d.name;
     
-    // Reset all hotspots
-    this.hotspotGroup.selectAll('.globe-hotspot')
-      .classed('globe-selected', false)
-      .attr('fill', '#e07b39');
+    // Reset all hotspot groups
+    this.hotspotGroup.selectAll('.globe-hotspot-group').classed('globe-selected', false);
+    this.hotspotGroup.selectAll('.globe-hotspot').attr('stroke', 'none');
     
-    // Highlight selected
-    d3.select(element)
-      .classed('globe-selected', true)
-      .attr('fill', '#dc3545');
+    // Highlight selected group
+    d3.select(element.parentNode).classed('globe-selected', true);
+    d3.select(element).attr('stroke', '#3d3229').attr('stroke-width', 2.5);
     
     // Calculate stats
     const latest = d.timeSeries[d.timeSeries.length - 1];
@@ -382,7 +409,7 @@ class GlobeVis {
       .curve(d3.curveMonotoneX);
     
     chartSvg.append('path').datum(timeSeries)
-      .attr('fill', 'rgba(224, 123, 57, 0.2)')
+      .attr('fill', 'rgba(196,93,62,0.15)')
       .attr('d', forestArea);
     
     // Forest line
@@ -393,7 +420,7 @@ class GlobeVis {
     
     chartSvg.append('path').datum(timeSeries)
       .attr('fill', 'none')
-      .attr('stroke', '#e07b39')
+      .attr('stroke', '#c45d3e')
       .attr('stroke-width', 2)
       .attr('d', forestLine);
     
@@ -404,7 +431,7 @@ class GlobeVis {
       .attr('cx', d => xScale(d.year))
       .attr('cy', d => yScaleForest(d.forestCover))
       .attr('r', 3)
-      .attr('fill', '#e07b39');
+      .attr('fill', '#c45d3e');
     
     // Bird line
     const birdLine = d3.line()
@@ -414,7 +441,7 @@ class GlobeVis {
     
     chartSvg.append('path').datum(timeSeries)
       .attr('fill', 'none')
-      .attr('stroke', '#4a7c43')
+      .attr('stroke', '#2d6a4f')
       .attr('stroke-width', 2)
       .attr('d', birdLine);
     
@@ -425,19 +452,21 @@ class GlobeVis {
       .attr('cx', d => xScale(d.year))
       .attr('cy', d => yScaleBirds(d.birdSpecies))
       .attr('r', 3)
-      .attr('fill', '#4a7c43');
+      .attr('fill', '#2d6a4f');
   }
   
   /**
-   * Close the popup
+   * Close the popup and resume globe rotation
    */
   closePopup() {
     document.getElementById('globe-popup').classList.remove('globe-visible');
     this.selectedRegion = null;
-    
-    this.hotspotGroup.selectAll('.globe-hotspot')
-      .classed('globe-selected', false)
-      .attr('fill', '#e07b39');
+    this.hotspotGroup.selectAll('.globe-hotspot-group').classed('globe-selected', false);
+    this.hotspotGroup.selectAll('.globe-hotspot').attr('stroke', 'none');
+    // Resume spinning when user closes the chart
+    this.isPaused = false;
+    document.getElementById('globe-paused').classList.remove('globe-visible');
+    this.startRotation();
   }
   
   /**
@@ -521,6 +550,12 @@ class GlobeVis {
 // Initialize on page load
 let globeVis;
 document.addEventListener('DOMContentLoaded', () => {
-  globeVis = new GlobeVis('globe-section');
-  globeVis.init();
+  try {
+    globeVis = new GlobeVis('globe-section');
+    globeVis.init().catch(err => {
+      console.error('Globe init failed:', err);
+    });
+  } catch (e) {
+    console.error('Globe setup error:', e);
+  }
 });
