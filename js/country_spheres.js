@@ -16,16 +16,8 @@ const csMetricToggle = csWrapper.append('div').attr('id', 'cs-metric-toggle');
 csMetricToggle.append('button').attr('class', 'cs-metric-btn active').attr('data-metric', 'per_capita').text('Per Capita');
 csMetricToggle.append('button').attr('class', 'cs-metric-btn').attr('data-metric', 'total').text('Total Emissions');
 
-const csControls = csWrapper.append('div').attr('id', 'cs-controls');
-csControls.append('button').attr('class', 'cs-btn').attr('id', 'cs-play-btn').text('▶ Play');
-csControls.append('input').attr('type', 'range').attr('id', 'cs-year-slider')
-  .attr('min', '1950').attr('max', '2023').attr('value', '2023').attr('step', '1');
-csControls.append('div').attr('id', 'cs-year-display').text('2023');
-
-const csSpeedControls = csControls.append('div').attr('id', 'cs-speed-controls');
-csSpeedControls.append('button').attr('class', 'cs-btn cs-speed-btn').attr('data-speed', '250').text('1×');
-csSpeedControls.append('button').attr('class', 'cs-btn cs-speed-btn active').attr('data-speed', '120').text('2×');
-csSpeedControls.append('button').attr('class', 'cs-btn cs-speed-btn').attr('data-speed', '50').text('5×');
+// Slot div preserves original position of the timeline controls (between metric toggle and legend)
+const csControlsSlot = csWrapper.append('div');
 
 csWrapper.append('div').attr('id', 'cs-legend');
 
@@ -56,7 +48,8 @@ const CS_COLORS = {
   'Africa': '#d4860b', 'Asia': '#1b6b93', 'Oceania': '#7b5ea7', 'Middle East': '#b07d2e'
 };
 
-let csYear = 2023, csMetric = 'per_capita', csPlaying = false, csInterval = null, csSpeed = 120;
+let csYear = 2023, csMetric = 'per_capita';
+let csTimeline = null;
 let csDetailCountry = null, csDetailMetric = 'per_capita';
 let csSimNodes = [], csSimNodeMap = {}, csSimulation = null;
 
@@ -357,10 +350,18 @@ function csCloseDetail() {
 // CONTROLS
 // ════════════════════════════════════════════
 function csSetupControls() {
-  const slider = document.getElementById('cs-year-slider');
-  const yearDisp = d3.select('#cs-year-display');
-  const playBtn = d3.select('#cs-play-btn');
-  let sliderRaf = null;
+  csTimeline = new TimelineSlider({
+    container: csControlsSlot,
+    min: 1950,
+    max: 2023,
+    initial: 2023,
+    defaultSpeed: 120,
+    ignoreKeyboard: (e) => !!e.target.closest('#cs-detail-panel'),
+    onChange: (year) => {
+      csYear = year;
+      csUpdateViz(year);
+    }
+  });
 
   d3.selectAll('.cs-metric-btn').on('click', function() {
     const btn = d3.select(this);
@@ -382,47 +383,8 @@ function csSetupControls() {
     csDrawDetailChart();
   });
 
-  slider.addEventListener('input', () => {
-    csYear = +slider.value;
-    yearDisp.text(csYear);
-    if (sliderRaf) cancelAnimationFrame(sliderRaf);
-    sliderRaf = requestAnimationFrame(() => csUpdateViz(csYear));
-  });
-
-  function startPlay() {
-    csPlaying = true;
-    playBtn.text('⏸ Pause').classed('active', true);
-    if (+slider.value >= 2023) slider.value = 1950;
-    csYear = +slider.value;
-    csInterval = setInterval(() => {
-      csYear++;
-      if (csYear > 2023) { stopPlay(); return; }
-      slider.value = csYear;
-      yearDisp.text(csYear);
-      csUpdateViz(csYear);
-    }, csSpeed);
-  }
-
-  function stopPlay() {
-    csPlaying = false;
-    playBtn.text('▶ Play').classed('active', false);
-    clearInterval(csInterval);
-  }
-
-  playBtn.on('click', () => csPlaying ? stopPlay() : startPlay());
-
-  d3.selectAll('.cs-speed-btn').on('click', function() {
-    d3.selectAll('.cs-speed-btn').classed('active', false);
-    d3.select(this).classed('active', true);
-    csSpeed = +this.dataset.speed;
-    if (csPlaying) { clearInterval(csInterval); startPlay(); }
-  });
-
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') csCloseDetail();
-    if (e.key === ' ' && !e.target.closest('#cs-detail-panel')) { e.preventDefault(); csPlaying ? stopPlay() : startPlay(); }
-    if (e.key === 'ArrowRight' && !csPlaying) { csYear = Math.min(2023, csYear+1); slider.value = csYear; yearDisp.text(csYear); csUpdateViz(csYear); }
-    if (e.key === 'ArrowLeft' && !csPlaying) { csYear = Math.max(1950, csYear-1); slider.value = csYear; yearDisp.text(csYear); csUpdateViz(csYear); }
   });
 
   window.addEventListener('resize', () => {
