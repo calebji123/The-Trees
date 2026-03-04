@@ -11,12 +11,29 @@
 	--spiral-warm: #c82838;
 }
 
+:root {
+    --cs-sand: #f5f0e8;
+    --cs-cream: #faf7f2;
+    --cs-warm-white: #fefcf9;
+    --cs-earth: #3d3229;
+    --cs-earth-mid: #6b5d50;
+    --cs-earth-light: #9a8d80;
+    --cs-clay: #c4a882;
+    --cs-terracotta: #c45d3e;
+    --cs-forest: #2d6a4f;
+    --cs-forest-light: #52b788;
+    --cs-ocean: #1b6b93;
+    --cs-ocean-light: #4da8c4;
+    --cs-amber: #d4860b;
+    --cs-rose: #b5485d;
+    --cs-accent: #c45d3e;
+  }
 
 
 .spiral-page {
-	max-width: 1100px;
+	/* max-width: 1100px;
 	margin: 0 auto;
-	padding: 3rem 1.5rem 4rem;
+	padding: 3rem 1.5rem 4rem; */
 }
 
 .spiral-hero {
@@ -41,10 +58,10 @@
 
 .spiral-card {
 	position: relative;
-	background: #ffffffc9;
-	border-radius: 24px;
-	padding: 2rem 2rem 2.5rem;
-	box-shadow: 0 30px 70px rgba(16, 24, 32, 0.12);
+	background: var(--cs-cream);
+	/* border-radius: 24px; */
+	/* padding: 2rem 2rem 2.5rem;
+	box-shadow: 0 30px 70px rgba(16, 24, 32, 0.12); */
 	backdrop-filter: blur(8px);
 }
 
