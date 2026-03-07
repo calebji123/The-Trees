@@ -16,6 +16,13 @@ const csMetricToggle = csWrapper.append('div').attr('id', 'cs-metric-toggle');
 csMetricToggle.append('button').attr('class', 'cs-metric-btn active').attr('data-metric', 'per_capita').text('Per Capita');
 csMetricToggle.append('button').attr('class', 'cs-metric-btn').attr('data-metric', 'total').text('Total Emissions');
 
+// multi select ui
+const csSelectToggle = csWrapper.append('div').attr('id', 'cs-select-toggle');
+csSelectToggle.append('button')
+  .attr('id', 'cs-multiselect-btn')
+  .attr('class', 'cs-metric-btn')
+  .text('Multi-select: OFF');
+
 // Slot div preserves original position of the timeline controls (between metric toggle and legend)
 const csControlsSlot = csWrapper.append('div');
 
@@ -52,6 +59,10 @@ let csYear = 2023, csMetric = 'per_capita';
 let csTimeline = null;
 let csDetailCountry = null, csDetailMetric = 'per_capita';
 let csSimNodes = [], csSimNodeMap = {}, csSimulation = null;
+
+// bird
+let csMultiSelect = false;
+const csSelectedCountries = new Set();
 
 const csMargin = { top: 80, right: 20, bottom: 10, left: 20 };
 let csW, csH;
@@ -112,6 +123,36 @@ function csShortName(name) {
     "Bonaire Sint Eustatius and Saba":"Bonaire"
   };
   return map[name] || (name.length > 9 ? name.slice(0,8)+'.' : name);
+}
+
+function csSyncBirdVizFromSelection() {
+  if (!csMultiSelect) return;
+
+  const selectedNames = Array.from(csSelectedCountries);
+  if (window.setSelectedCountryNames) {
+    window.setSelectedCountryNames(selectedNames.length ? selectedNames : null);
+    return;
+  }
+  if (window.countryNameToISO3 && window.setSelectedCountryCodes) {
+    const iso3s = selectedNames
+      .map(name => window.countryNameToISO3(name))
+      .filter(Boolean);
+
+    window.setSelectedCountryCodes(iso3s.length ? iso3s : null);
+    return;
+  }
+  console.warn("Bird viz selection helpers are not available.");
+}
+
+function csUpdateSelectionStyles() {
+  csBubbleG.selectAll('.cs-bg')
+    .classed('cs-selected', d => csSelectedCountries.has(d.country));
+
+  csBubbleG.selectAll('.cs-bg .cs-bc')
+    .attr('stroke-width', d => csSelectedCountries.has(d.country) ? Math.max(2.2, (d.r > 8 ? 1.5 : 0.8)) : (d.r > 8 ? 1.5 : 0.8))
+    .attr('fill-opacity', d => csSelectedCountries.has(d.country) ? 0.28 : 0.18)
+    .attr('stroke-opacity', d => csSelectedCountries.has(d.country) ? 0.95 : 0.7)
+    ;
 }
 
 // ════════════════════════════════════════════
@@ -213,10 +254,26 @@ function csUpdateViz(year) {
   sel.exit().transition().duration(300).attr('opacity', 0).remove();
 
   const enter = sel.enter().append('g').attr('class','cs-bg')
-    .attr('opacity', 0).style('cursor','pointer')
-    .on('click', (_, d) => csOpenDetail(d.country))
-    .on('mouseenter', csShowTooltip).on('mousemove', csShowTooltip)
-    .on('mouseleave', csHideTooltip);
+  .attr('opacity', 0)
+  .style('cursor','pointer')
+  .on('click', (event, d) => {
+    if (csMultiSelect) {
+      if (csSelectedCountries.has(d.country)) csSelectedCountries.delete(d.country);
+      else csSelectedCountries.add(d.country);
+
+      csUpdateSelectionStyles();
+      csSyncBirdVizFromSelection();
+      return;
+    }
+
+    csOpenDetail(d.country);
+    if (window.selectCountryForBirdViz) {
+      window.selectCountryForBirdViz(d.country);
+    }
+  })
+  .on('mouseenter', csShowTooltip)
+  .on('mousemove', csShowTooltip)
+  .on('mouseleave', csHideTooltip);
 
   enter.append('circle').attr('class','cs-bc');
   enter.append('text').attr('class','cs-bname').attr('text-anchor','middle').attr('pointer-events','none')
@@ -249,6 +306,8 @@ function csUpdateViz(year) {
     .text(d => (!labelSet.has(d.country) || d.r < 26) ? '' : d.trend === 'up' ? '▲' : d.trend === 'down' ? '▼' : '—')
     .attr('dy', '1.6em').attr('font-size', d => Math.max(6, Math.min(10, d.r * 0.3)) + 'px')
     .attr('fill', d => d.trend === 'up' ? '#c45d3e' : d.trend === 'down' ? '#2d6a4f' : '#9a8d80');
+
+    csUpdateSelectionStyles();
 }
 
 // ════════════════════════════════════════════
@@ -375,6 +434,21 @@ function csSetupControls() {
     d3.select('#cs-main-title').html(csMetric === 'per_capita' ? 'Our Warming World<br><em>CO₂ Per Capita</em>' : 'Our Warming World<br><em>Total CO₂ Emissions</em>');
     csUpdateViz(csYear);
   });
+
+  d3.select('#cs-multiselect-btn').on('click', function() {
+  csMultiSelect = !csMultiSelect;
+  d3.select(this).text(csMultiSelect ? 'Multi-select: ON' : 'Multi-select: OFF')
+    .classed('active', csMultiSelect);
+  if (!csMultiSelect) {
+    csSelectedCountries.clear();
+    csUpdateSelectionStyles();
+    if (window.setSelectedCountryCodes) window.setSelectedCountryCodes(null);
+  } else {
+    csSelectedCountries.clear();
+    csUpdateSelectionStyles();
+    csSyncBirdVizFromSelection();
+  }
+});
 
   d3.selectAll('.cs-detail-mbtn').on('click', function() {
     d3.selectAll('.cs-detail-mbtn').classed('active', false);

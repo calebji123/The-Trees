@@ -1,13 +1,14 @@
 (() => {
-  const CSV_FILE   = "data/final_global_forest_rli_2001_2023.csv";
-  const IMG_BIRDS  = "assets/birds.PNG";
-  const IMG_RAIN   = "assets/rain.PNG";
-  const IMG_TREES  = "assets/trees.PNG";
-  const IMG_SMOKE  = "assets/smoke.PNG";
+  const CSV_FILE = "data/final_global_forest_rli_2001_2023.csv";
+  const RLI_COUNTRY_FILE = "data/red-list-index.csv";
+
+  const IMG_BIRDS = "assets/birds.PNG";
+  const IMG_RAIN = "assets/rain.PNG";
+  const IMG_TREES = "assets/trees.PNG";
+  const IMG_SMOKE = "assets/smoke.PNG";
 
   const minSmoke = 0.10, maxSmoke = 0.60;
-  const minRain  = 0.05, maxRain  = 0.50; 
-
+  const minRain = 0.05, maxRain = 0.50;
   const blendPx = 160;
 
   const W = 1000, H = 720;
@@ -18,10 +19,8 @@
   const sceneW = W - margin.l - margin.r;
   const sceneH = 560;
 
- 
   const clamp01 = (x) => Math.max(0, Math.min(1, x));
   const compress = (t, lo, hi) => lo + t * (hi - lo);
-
 
   const mount = d3.select("body")
     .append("section")
@@ -34,7 +33,7 @@
       <h2 style="font-family: Space Grotesk, system-ui; margin-bottom: 8px;">
         Forest Loss & Bird Extinction Risk
       </h2>
-      </p>
+
       <div id="forest-rli-container" style="max-width:1100px;"></div>
 
       <div class="controls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
@@ -47,6 +46,10 @@
         <input id="forestYearSlider" type="range" style="min-width:320px;" />
 
         <span class="badge text-bg-light" style="font-weight:400;">
+          Selection: <span id="forestSelLabel">Global</span>
+        </span>
+
+        <span class="badge text-bg-light" style="font-weight:400;">
           Forest loss: <span id="forestLossLabel"></span>
         </span>
         <span class="badge text-bg-light" style="font-weight:400;">
@@ -54,7 +57,6 @@
         </span>
       </div>
     `);
-
 
   const svg = d3.select("#forest-rli-container")
     .append("svg")
@@ -81,7 +83,7 @@
   makeClip("clipRain");
 
   function makeSoftMasks(prefix) {
-    const gradLeftId  = `${prefix}-grad-left`;
+    const gradLeftId = `${prefix}-grad-left`;
     const gradRightId = `${prefix}-grad-right`;
 
     const gl = defs.append("linearGradient")
@@ -102,7 +104,7 @@
     gr.append("stop").attr("offset", "65%").attr("stop-color", "white");
     gr.append("stop").attr("offset", "100%").attr("stop-color", "white");
 
-    const maskLeftId  = `${prefix}-mask-left`;
+    const maskLeftId = `${prefix}-mask-left`;
     const maskRightId = `${prefix}-mask-right`;
 
     const mL = defs.append("mask").attr("id", maskLeftId).attr("maskUnits", "userSpaceOnUse");
@@ -122,7 +124,7 @@
   }
 
   const forestMasks = makeSoftMasks("forest");
-  const birdMasks   = makeSoftMasks("birds");
+  const birdMasks = makeSoftMasks("birds");
 
   const gScene = svg.append("g");
 
@@ -164,9 +166,30 @@
       .attr("x2", x2).attr("y2", 0);
   }
 
-  // load data + interaction
-  d3.csv(CSV_FILE, d3.autoType).then((data) => {
+  Promise.all([
+    d3.csv(CSV_FILE, d3.autoType),
+    d3.csv(RLI_COUNTRY_FILE, d3.autoType),
+  ]).then(([data, rliRows]) => {
     data.sort((a, b) => a.year - b.year);
+
+    const nameToISO3 = new Map();
+    const iso3ToName = new Map();
+    const rliByCodeYear = new Map();
+
+    for (const d of rliRows) {
+      const name = (d.Entity || "").trim();
+      const code = (d.Code || "").trim();
+      const year = +d.Year;
+      const rli = +d["Red List Index"];
+
+      if (name && code) {
+        nameToISO3.set(name, code);
+        iso3ToName.set(code, name);
+      }
+      if (code && Number.isFinite(year) && Number.isFinite(rli)) {
+        rliByCodeYear.set(`${code}|${year}`, rli);
+      }
+    }
 
     const years = data.map(d => d.year);
     const slider = document.getElementById("forestYearSlider");
@@ -176,54 +199,151 @@
 
     let idx = +slider.value;
 
-    const riskExtent = d3.extent(data, d => d.risk);
-    const riskTo01 = d3.scaleLinear().domain(riskExtent).range([0, 1]).clamp(true);
+    let selectedCodes = null;
+
+    function getCurrentRiskScale() {
+  // Global mode
+  if (!selectedCodes || selectedCodes.length === 0) {
+    const extent = d3.extent(data, row => 1 - row.rli);
+    return d3.scaleLinear().domain(extent).range([0, 1]).clamp(true);
+  }
+  // select mode
+  const selectedRiskSeries = data.map(row => {
+    const vals = [];
+    for (const code of selectedCodes) {
+      const v = rliByCodeYear.get(`${code}|${row.year}`);
+      if (Number.isFinite(v)) vals.push(v);
+    }
+    const rli = vals.length ? d3.mean(vals) : row.rli;
+    return 1 - rli;
+  });
+  let extent = d3.extent(selectedRiskSeries);
+  if (!extent || !Number.isFinite(extent[0]) || !Number.isFinite(extent[1])) {
+    extent = [0, 1];
+  } else if (extent[0] === extent[1]) {
+    extent = [extent[0] - 0.01, extent[1] + 0.01];
+  }
+
+  return d3.scaleLinear().domain(extent).range([0, 1]).clamp(true);
+}
+
+    function setSelectionLabel() {
+      const labelEl = document.getElementById("forestSelLabel");
+      if (!labelEl) return;
+
+      if (!selectedCodes || selectedCodes.length === 0) {
+        labelEl.textContent = "Global";
+        return;
+      }
+      if (selectedCodes.length === 1) {
+        labelEl.textContent = iso3ToName.get(selectedCodes[0]) || selectedCodes[0];
+        return;
+      }
+      labelEl.textContent = `${selectedCodes.length} countries`;
+    }
+
+    window.countryNameToISO3 = function(name) {
+      if (!name) return null;
+      return nameToISO3.get(String(name).trim()) || null;
+    };
+
+    window.setSelectedCountryNames = function(names) {
+      if (!Array.isArray(names) || names.length === 0) {
+        window.setSelectedCountryCodes(null);
+        return;
+      }
+      const iso3s = names
+        .map(n => window.countryNameToISO3(n))
+        .filter(Boolean);
+      window.setSelectedCountryCodes(iso3s.length ? iso3s : null);
+    };
+
+    window.setSelectedCountryCodes = function(codes) {
+      if (!Array.isArray(codes) || codes.length === 0) {
+        selectedCodes = null;
+        setSelectionLabel();
+        render(data[idx]);
+        return;
+      }
+
+      const clean = Array.from(new Set(
+        codes.map(c => String(c).trim().toUpperCase()).filter(c => /^[A-Z]{3}$/.test(c))
+      ));
+
+      selectedCodes = clean.length ? clean : null;
+      setSelectionLabel();
+      render(data[idx]);
+    };
+
+    window.selectCountryForBirdViz = function(countryOrISO3) {
+      if (!countryOrISO3) {
+        window.setSelectedCountryCodes(null);
+        return;
+      }
+      const key = String(countryOrISO3).trim();
+      const iso3 = /^[A-Z]{3}$/.test(key) ? key : (nameToISO3.get(key) || null);
+      if (!iso3) {
+        console.warn("RLI: no ISO3 match for:", key);
+        return;
+      }
+      window.setSelectedCountryCodes([iso3]);
+    };
 
     function render(d) {
+      let rli = d.rli;
+
+      if (selectedCodes && selectedCodes.length) {
+        const vals = [];
+        for (const code of selectedCodes) {
+          const v = rliByCodeYear.get(`${code}|${d.year}`);
+          if (Number.isFinite(v)) vals.push(v);
+        }
+        if (vals.length) rli = d3.mean(vals);
+      }
+
+      const risk = 1 - rli;
+
       document.getElementById("forestYearLabel").textContent = `${d.year}`;
-      document.getElementById("forestLossLabel").textContent = `${Math.round(d.forest_loss).toLocaleString()} ha`;
-      document.getElementById("forestRliLabel").textContent = d.rli.toFixed(2);
-      document.getElementById("forestRiskLabel").textContent = d.risk.toFixed(2);
+      document.getElementById("forestLossLabel").textContent =
+        `${Math.round(d.forest_loss).toLocaleString()} ha`;
+      document.getElementById("forestRliLabel").textContent = rli.toFixed(2);
+      document.getElementById("forestRiskLabel").textContent = risk.toFixed(2);
 
       const smokeRaw = clamp01(d.forest_loss_norm);
       const smokeShare = clamp01(compress(smokeRaw, minSmoke, maxSmoke));
       const treeShare = 1 - smokeShare;
 
-      const rainRaw = clamp01(riskTo01(d.risk));
+      const currentRiskTo01 = getCurrentRiskScale();
+      const rainRaw = clamp01(currentRiskTo01(risk));
       const rainShare = clamp01(compress(rainRaw, minRain, maxRain));
       const birdsShare = 1 - rainShare;
 
       const forestBoundaryX = sceneX + sceneW * treeShare;
-      const birdBoundaryX   = sceneX + sceneW * birdsShare;
+      const birdBoundaryX = sceneX + sceneW * birdsShare;
 
       defs.select("#clipTrees rect")
-        .attr("x", sceneX)
-        .attr("y", sceneY)
+        .attr("x", sceneX).attr("y", sceneY)
         .attr("width", sceneW * treeShare + blendPx)
         .attr("height", sceneH);
 
       defs.select("#clipSmoke rect")
-        .attr("x", forestBoundaryX - blendPx)
-        .attr("y", sceneY)
+        .attr("x", forestBoundaryX - blendPx).attr("y", sceneY)
         .attr("width", sceneW * smokeShare + blendPx)
         .attr("height", sceneH);
 
       defs.select("#clipBirds rect")
-        .attr("x", sceneX)
-        .attr("y", sceneY)
+        .attr("x", sceneX).attr("y", sceneY)
         .attr("width", sceneW * birdsShare + blendPx)
         .attr("height", sceneH);
 
       defs.select("#clipRain rect")
-        .attr("x", birdBoundaryX - blendPx)
-        .attr("y", sceneY)
+        .attr("x", birdBoundaryX - blendPx).attr("y", sceneY)
         .attr("width", sceneW * rainShare + blendPx)
         .attr("height", sceneH);
 
-      updateSoftGradient(forestMasks.gradLeftId,  forestBoundaryX);
+      updateSoftGradient(forestMasks.gradLeftId, forestBoundaryX);
       updateSoftGradient(forestMasks.gradRightId, forestBoundaryX);
-
-      updateSoftGradient(birdMasks.gradLeftId,  birdBoundaryX);
+      updateSoftGradient(birdMasks.gradLeftId, birdBoundaryX);
       updateSoftGradient(birdMasks.gradRightId, birdBoundaryX);
     }
 
@@ -232,19 +352,22 @@
       slider.value = idx;
       render(data[idx]);
     };
+
     document.getElementById("forestNext").onclick = () => {
       idx = Math.min(years.length - 1, idx + 1);
       slider.value = idx;
       render(data[idx]);
     };
+
     slider.oninput = (e) => {
       idx = +e.target.value;
       render(data[idx]);
     };
 
+    setSelectionLabel();
     render(data[idx]);
+
   }).catch((err) => {
-    // debug line just in case
     console.error(err);
     d3.select("#forest-rli-container")
       .append("div")
@@ -253,4 +376,3 @@
       .text("Failed to load forest/RLI visualization data or assets. Check console for details.");
   });
 })();
-        
