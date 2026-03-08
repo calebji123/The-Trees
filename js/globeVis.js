@@ -14,6 +14,7 @@ class GlobeVis {
     this.selectedRegion = null;
     this.isPaused = false;
     this.rotationTimer = null;
+    this.graticulePath = null;
     this.data = [];
   }
   
@@ -187,10 +188,10 @@ class GlobeVis {
       .attr('fill', '#4da8c4')
       .attr('opacity', 0.25);
     
-    // Graticule (grid lines)
-    const graticule = d3.geoGraticule();
-    this.svg.append('path')
-      .datum(graticule)
+    // Graticule (grid lines) – keep a reference so it rotates with the globe
+    this.graticule = d3.geoGraticule();
+    this.graticulePath = this.svg.append('path')
+      .datum(this.graticule())
       .attr('d', this.path)
       .attr('fill', 'none')
       .attr('stroke', 'rgba(61,50,41,0.12)')
@@ -521,6 +522,9 @@ class GlobeVis {
   updateMap() {
     this.svg.selectAll('.globe-country').attr('d', this.path);
     this.landGroup.selectAll('path').attr('d', this.path);
+    if (this.graticulePath && this.graticule) {
+      this.graticulePath.attr('d', this.path(this.graticule()));
+    }
     this.updatePositions();
   }
   
