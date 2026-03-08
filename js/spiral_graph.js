@@ -50,9 +50,8 @@ function formatTemperature(value) {
 class SpiralGraph {
 	constructor({ svgId, dataPath, timelineId = "#timeline_graph", tooltipId = "#tooltip" }) {
 		this.svg = d3.select(svgId);
-		this.timelineSvg = d3.select(timelineId);
+		this.timelineContainer = d3.select(timelineId);
 		this.tooltip = d3.select(tooltipId);
-		this.timelineValue = d3.select("#timeline_value");
 		this.dataPath = dataPath;
 		this.width = 900;
 		this.height = 900;
@@ -65,8 +64,7 @@ class SpiralGraph {
 		this.tempAmplitude = 20;
 		this.prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		this.currentYear = null;
-		this.isScrubbing = false;
-		this.autoplayTimer = null;
+		this.timelineSlider = null;
 
 		this.initLayout();
 		this.loadData();
@@ -74,7 +72,6 @@ class SpiralGraph {
 
 	initLayout() {
 		this.svg.attr("viewBox", `0 0 ${this.width} ${this.height}`);
-		this.timelineSvg.attr("viewBox", "0 0 900 70");
 
 		this.defs = this.svg.append("defs");
 		const gradient = this.defs
@@ -98,18 +95,98 @@ class SpiralGraph {
 		this.baselineGroup = this.chart.append("g").attr("class", "baseline-group");
 		this.segmentGroup = this.chart.append("g").attr("class", "segments");
 		this.holeGroup = this.chart.append("g").attr("class", "center-hole");
+		this.globeGroup = this.chart.append("g").attr("class", "center-globe");
 		this.hoverGroup = this.chart.append("g").attr("class", "hover-points");
 
-		this.timelineWidth = 900;
-		this.timelineHeight = 70;
-		this.timelineMargin = { left: 30, right: 30, top: 18, bottom: 18 };
-		this.timelineInnerWidth = this.timelineWidth - this.timelineMargin.left - this.timelineMargin.right;
-		this.timelineCenterY = this.timelineHeight / 2 + 8;
+		this.globeRadius = Math.max(18, (this.centerHoleRadius - 14) * 0.6);
+		this.renderCenterGlobe();
+	}
 
-		this.timelineGroup = this.timelineSvg
+	renderCenterGlobe() {
+		const frameSelection = this.holeGroup.selectAll("circle.spiral-center-frame").data([this.centerHoleRadius]);
+		const frameEnter = frameSelection
+			.enter()
+			.append("circle")
+			.attr("class", "spiral-center-frame")
+			.attr("fill", "none")
+			.attr("stroke", "#e0e4ea")
+			.attr("stroke-width", 1.2)
+			.attr("stroke-dasharray", "6 6");
+		frameSelection.merge(frameEnter).attr("r", (d) => d);
+		frameSelection.exit().remove();
+
+		this.globeProjection = d3
+			.geoOrthographic()
+			.scale(this.globeRadius)
+			.translate([0, 0])
+			.clipAngle(90)
+			.rotate([-20, -20]);
+		this.globePath = d3.geoPath().projection(this.globeProjection);
+
+		const oceanSelection = this.globeGroup.selectAll("path.spiral-globe-ocean").data([{ type: "Sphere" }]);
+		const oceanEnter = oceanSelection
+			.enter()
+			.append("path")
+			.attr("class", "spiral-globe-ocean")
+			.attr("fill", "#4da8c4")
+			.attr("opacity", 0.25)
+			.attr("stroke", "rgba(61,50,41,0.15)")
+			.attr("stroke-width", 0.5);
+		oceanSelection.merge(oceanEnter).attr("d", this.globePath);
+		oceanSelection.exit().remove();
+
+		const graticuleSelection = this.globeGroup
+			.selectAll("path.spiral-globe-graticule")
+			.data([d3.geoGraticule()()]);
+		const graticuleEnter = graticuleSelection
+			.enter()
+			.append("path")
+			.attr("class", "spiral-globe-graticule")
+			.attr("fill", "none")
+			.attr("stroke", "rgba(61,50,41,0.12)")
+			.attr("stroke-width", 0.5);
+		graticuleSelection.merge(graticuleEnter).attr("d", this.globePath);
+		graticuleSelection.exit().remove();
+
+		const landGroupSelection = this.globeGroup.selectAll("g.spiral-globe-land-group").data([null]);
+		const landGroupEnter = landGroupSelection
+			.enter()
 			.append("g")
-			.attr("class", "timeline-group")
-			.attr("transform", `translate(0, ${this.timelineCenterY})`);
+			.attr("class", "spiral-globe-land-group");
+		this.globeLandGroup = landGroupSelection.merge(landGroupEnter);
+
+		this.loadCenterGlobeLand();
+
+		this.globeGroup.style("pointer-events", "none");
+	}
+
+	loadCenterGlobeLand() {
+		if (!window.topojson || typeof window.topojson.feature !== "function") {
+			return;
+		}
+
+		d3.json("https://unpkg.com/world-atlas@2/countries-110m.json")
+			.then((world) => {
+				if (!world || !world.objects || !world.objects.countries) {
+					return;
+				}
+				const countries = window.topojson.feature(world, world.objects.countries);
+				const countrySelection = this.globeLandGroup
+					.selectAll("path.spiral-globe-country")
+					.data(countries.features);
+				const countryEnter = countrySelection
+					.enter()
+					.append("path")
+					.attr("class", "spiral-globe-country")
+					.attr("fill", "#2d6a4f")
+					.attr("stroke", "rgba(61,50,41,0.15)")
+					.attr("stroke-width", 0.35);
+				countrySelection.merge(countryEnter).attr("d", this.globePath);
+				countrySelection.exit().remove();
+			})
+			.catch(() => {
+				// leave ocean + graticule only when world atlas is unavailable
+			});
 	}
 
 	loadData() {
@@ -147,9 +224,44 @@ class SpiralGraph {
 				.y((d) => d.y);
 
 			this.renderLegend();
-			this.initTimeline();
+			this.initTimelineSlider();
 			this.syncToYear(this.startYear, true);
-			this.startAutoplay(this.startYear);
+			if (this.timelineSlider) {
+				this.timelineSlider.play();
+			}
+		});
+	}
+
+	initTimelineSlider() {
+		if (this.timelineContainer.empty()) {
+			return;
+		}
+
+		this.timelineContainer.selectAll("*").remove();
+
+		if (this.timelineSlider) {
+			this.timelineSlider.destroy();
+			this.timelineSlider = null;
+		}
+
+		if (typeof TimelineSlider === "undefined") {
+			return;
+		}
+
+		this.timelineSlider = new TimelineSlider({
+			container: this.timelineContainer,
+			min: this.startYear,
+			max: this.endYear,
+			initial: this.startYear,
+			speeds: [
+				{ label: "1×", ms: 120 },
+				{ label: "2×", ms: 70 },
+				{ label: "5×", ms: 30 }
+			],
+			defaultSpeed: 120,
+			onChange: (year) => {
+				this.syncToYear(year, false);
+			}
 		});
 	}
 
@@ -316,17 +428,6 @@ class SpiralGraph {
 			segments.attr("stroke-dashoffset", 0);
 		}
 
-		const holeSelection = this.holeGroup.selectAll("circle").data([this.centerHoleRadius]);
-		const holeEnter = holeSelection
-			.enter()
-			.append("circle")
-			.attr("fill", "none")
-			.attr("stroke", "#e0e4ea")
-			.attr("stroke-width", 1.2)
-			.attr("stroke-dasharray", "6 6");
-		holeSelection.merge(holeEnter).attr("r", (d) => d);
-		holeSelection.exit().remove();
-
 		const hoverSelection = this.hoverGroup
 			.selectAll("circle")
 			.data(withPosition, (d) => d.t);
@@ -353,158 +454,9 @@ class SpiralGraph {
 		hoverSelection.exit().remove();
 	}
 
-	initTimeline() {
-		this.timelineScale = d3
-			.scaleLinear()
-			.domain([this.startYear, this.endYear])
-			.range([this.timelineMargin.left, this.timelineMargin.left + this.timelineInnerWidth]);
-
-		const trackSelection = this.timelineGroup.selectAll("line.timeline-track").data([null]);
-		const trackEnter = trackSelection
-			.enter()
-			.append("line")
-			.attr("class", "timeline-track")
-			.attr("y1", 0)
-			.attr("y2", 0)
-			.attr("stroke", "#d3d8df")
-			.attr("stroke-width", 2)
-			.attr("stroke-linecap", "round");
-		trackSelection
-			.merge(trackEnter)
-			.attr("x1", this.timelineScale(this.startYear))
-			.attr("x2", this.timelineScale(this.endYear));
-		trackSelection.exit().remove();
-
-		const tickYears = d3.range(this.startYear, this.endYear + 1, 10);
-		const tickSelection = this.timelineGroup.selectAll("line.tick").data(tickYears, (d) => d);
-		const tickEnter = tickSelection
-			.enter()
-			.append("line")
-			.attr("class", "tick")
-			.attr("y1", -6)
-			.attr("y2", 6)
-			.attr("stroke", "#b7c0cc")
-			.attr("stroke-width", 1);
-		tickSelection
-			.merge(tickEnter)
-			.attr("x1", (d) => this.timelineScale(d))
-			.attr("x2", (d) => this.timelineScale(d));
-		tickSelection.exit().remove();
-
-		const labelSelection = this.timelineGroup
-			.selectAll("text.tick-label")
-			.data(tickYears, (d) => d);
-		const labelEnter = labelSelection
-			.enter()
-			.append("text")
-			.attr("class", "tick-label")
-			.attr("y", 22)
-			.attr("text-anchor", "middle")
-			.attr("fill", "#5b6b7a")
-			.attr("font-size", 11);
-		labelSelection
-			.merge(labelEnter)
-			.attr("x", (d) => this.timelineScale(d))
-			.text((d) => d);
-		labelSelection.exit().remove();
-
-		const markerSelection = this.timelineGroup.selectAll("circle.timeline-marker").data([null]);
-		const markerEnter = markerSelection
-			.enter()
-			.append("circle")
-			.attr("class", "timeline-marker")
-			.attr("cy", 0)
-			.attr("r", 6)
-			.attr("fill", "#101820");
-		this.timelineMarker = markerSelection.merge(markerEnter).attr("cx", this.timelineScale(this.startYear));
-		markerSelection.exit().remove();
-
-		const hitAreaSelection = this.timelineGroup.selectAll("rect.timeline-hit").data([null]);
-		const hitAreaEnter = hitAreaSelection
-			.enter()
-			.append("rect")
-			.attr("class", "timeline-hit")
-			.attr("y", -14)
-			.attr("height", 28)
-			.attr("fill", "transparent")
-			.attr("cursor", "ew-resize");
-		this.timelineHitArea = hitAreaSelection
-			.merge(hitAreaEnter)
-			.attr("x", this.timelineScale(this.startYear))
-			.attr("width", this.timelineScale(this.endYear) - this.timelineScale(this.startYear));
-		hitAreaSelection.exit().remove();
-
-		this.bindTimelineInteraction();
-	}
-
-	bindTimelineInteraction() {
-		const handleScrub = (xPosition) => {
-			const clampedX = Math.max(
-				this.timelineScale(this.startYear),
-				Math.min(this.timelineScale(this.endYear), xPosition)
-			);
-			const targetYear = Math.round(this.timelineScale.invert(clampedX));
-			this.syncToYear(targetYear, false);
-		};
-
-		const dragBehavior = d3
-			.drag()
-			.on("start", (event) => {
-				this.isScrubbing = true;
-				this.stopAutoplay();
-				handleScrub(event.x);
-			})
-			.on("drag", (event) => {
-				handleScrub(event.x);
-			})
-			.on("end", () => {
-				this.isScrubbing = false;
-				this.startAutoplay(this.currentYear);
-			});
-
-		this.timelineHitArea.call(dragBehavior);
-		this.timelineMarker.call(dragBehavior);
-	}
-
 	syncToYear(targetYear, animate) {
 		this.currentYear = targetYear;
 		this.render(targetYear, animate);
-		this.timelineMarker.attr("cx", this.timelineScale(targetYear));
-		if (!this.timelineValue.empty()) {
-			this.timelineValue.text(targetYear);
-		}
-	}
-
-	stopAutoplay() {
-		if (this.autoplayTimer) {
-			this.autoplayTimer.stop();
-			this.autoplayTimer = null;
-		}
-	}
-
-	startAutoplay(fromYear) {
-		const startFrom = Math.max(this.startYear, Math.min(this.endYear, fromYear));
-		const totalYears = this.endYear - startFrom;
-		if (totalYears <= 0) {
-			return;
-		}
-		const duration = 10000;
-		const startTime = performance.now();
-		this.stopAutoplay();
-		this.autoplayTimer = d3.timer(() => {
-			if (this.isScrubbing) {
-				return;
-			}
-			const elapsed = performance.now() - startTime;
-			const progress = Math.min(1, elapsed / duration);
-			const targetYear = Math.round(startFrom + totalYears * progress);
-			if (targetYear !== this.currentYear) {
-				this.syncToYear(targetYear, false);
-			}
-			if (progress >= 1) {
-				this.stopAutoplay();
-			}
-		});
 	}
 }
 
