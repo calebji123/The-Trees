@@ -1,0 +1,192 @@
+/* =============================================
+   GLOBE SIDE PANEL
+   Replaces the old on-globe popup
+   ============================================= */
+
+/* Backdrop */
+.globe-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 50, 41, 0.18);
+  backdrop-filter: blur(3px);
+  z-index: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.globe-panel-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Panel */
+.globe-side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(420px, 90vw);
+  background: var(--bg-warm);
+  border-left: 1px solid rgba(61, 50, 41, 0.1);
+  z-index: 900;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -20px 0 60px rgba(61, 50, 41, 0.1);
+}
+
+.globe-side-panel.open {
+  transform: translateX(0);
+}
+
+/* Panel header */
+.gsp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-warm);
+  z-index: 1;
+}
+
+.gsp-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.gsp-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: var(--fg-muted);
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.gsp-close:hover { color: var(--fg); }
+
+/* Stats */
+.gsp-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.gsp-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.gsp-stat-val {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--cs-terracotta);
+  line-height: 1;
+}
+
+.gsp-stat-lbl {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.73rem;
+  color: var(--fg-muted);
+  line-height: 1.3;
+}
+
+/* Chart area */
+.gsp-chart-wrap {
+  padding: 0 1.5rem;
+}
+
+.gsp-chart-heading {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-muted);
+  margin-bottom: 0.75rem;
+}
+
+#globe-chart {
+  width: 100%;
+  min-height: 180px;
+}
+
+/* Chart legend */
+.gsp-legend {
+  display: flex;
+  gap: 1.2rem;
+  padding: 0.5rem 1.5rem 1rem;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.gsp-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gsp-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Forest RLI context */
+.gsp-forest-context {
+  margin: 0 1.5rem 1.5rem;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.gsp-forest-heading {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 0.25rem;
+}
+
+.gsp-forest-sub {
+  font-size: 0.73rem;
+  color: var(--fg-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+#gsp-forest-chart {
+  width: 100%;
+}
+
+/* On small screens — panel stacks below globe */
+@media (max-width: 640px) {
+  .globe-side-panel {
+    position: static;
+    width: 100%;
+    height: auto;
+    transform: none;
+    box-shadow: none;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .globe-side-panel.open {
+    display: flex;
+  }
+  .globe-panel-backdrop { display: none; }
+}
