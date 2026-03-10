@@ -1,0 +1,73 @@
+/* =============================================
+   PROGRESS NAV — fixed right-side dots
+   ============================================= */
+
+#progress-nav {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+#progress-nav.visible {
+  opacity: 1;
+}
+
+.pnav-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.pnav-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-muted);
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.pnav-item:hover .pnav-label,
+.pnav-item.active .pnav-label {
+  opacity: 1;
+  transform: none;
+}
+
+.pnav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 1.5px solid var(--fg-muted);
+  flex-shrink: 0;
+  transition: background 0.25s, transform 0.25s, border-color 0.25s;
+}
+
+.pnav-item.active .pnav-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.35);
+}
+
+.pnav-item:hover .pnav-dot {
+  border-color: var(--fg-mid);
+}
+
+@media (max-width: 768px) {
+  #progress-nav { display: none; }
+}

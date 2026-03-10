@@ -1,0 +1,188 @@
+/* =============================================
+   SPIRAL + GLOBE SCROLL TRANSITION
+   ============================================= */
+
+/* Scroll track — gives vertical space for the transition */
+.spiral-globe-track {
+  position: relative;
+}
+
+/* Sticky inner panel */
+.spiral-globe-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scene layers — both fill the sticky panel */
+.scene-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spiral scene — JS drives opacity + subtle scale */
+.scene-spiral {
+  z-index: 3;
+  background: var(--cs-cream);
+  flex-direction: column;
+  padding: 0;
+  will-change: opacity, transform;
+  transform-origin: center center;
+}
+
+.scene-spiral .spiral-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-spiral .spiral-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#spiral_graph {
+  width: min(92vh, 92vw);
+  height: min(82vh, 82vw);
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Globe overlay — sits behind the spiral; JS drives opacity only (no clip-path). */
+.scene-globe {
+  z-index: 2;
+  background: var(--globe-cream);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(196,93,62,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(45,106,79,0.05) 0%, transparent 55%);
+  opacity: 0;
+  will-change: opacity;
+  flex-direction: column;
+}
+
+/* When transition is active/complete */
+.scene-globe.transitioning {
+  /* JS drives these via inline style */
+}
+
+/* Override globe-section styles within the transition scene */
+.scene-globe #globe-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  min-height: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.scene-globe .globe-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The globe title/subtitle get de-emphasized inside the scene */
+.scene-globe .globe-title {
+  font-size: clamp(16px, 2vw, 24px);
+  margin-bottom: 4px;
+}
+
+.scene-globe .globe-subtitle {
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+/* Scroll hint overlay at bottom of spiral phase */
+.spiral-scroll-hint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.spiral-scroll-hint.visible {
+  opacity: 1;
+}
+
+.spiral-scroll-hint::before {
+  content: '↓';
+}
+
+/* Deforestation narrative that overlays the globe */
+.deforestation-narrative {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(320px, 35%);
+  padding: 2rem;
+  z-index: 5;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.4s, transform 0.4s;
+  pointer-events: none;
+}
+
+.deforestation-narrative.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.deforestation-narrative .section-eyebrow {
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.deforestation-narrative .section-heading {
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  text-align: left;
+}
+
+.deforestation-narrative .section-body {
+  font-size: 0.9rem;
+  text-align: left;
+  margin-left: 0;
+  margin-top: 1rem;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .deforestation-narrative {
+    position: static;
+    width: 100%;
+    opacity: 1;
+    transform: none;
+    padding: 1.5rem;
+    pointer-events: auto;
+  }
+  .spiral-globe-track { height: auto !important; }
+  .spiral-globe-sticky { position: static; height: auto; }
+  .scene-layer { position: static; }
+  .scene-globe {
+    opacity: 1 !important;
+  }
+  .scene-spiral { position: static; }
+}

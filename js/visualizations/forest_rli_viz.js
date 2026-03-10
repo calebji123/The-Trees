@@ -1,12 +1,20 @@
-(() => {
-  const CSV_FILE   = "data/final_global_forest_rli_2001_2023.csv";
-  const IMG_BIRDS  = "assets/birds.PNG";
-  const IMG_RAIN   = "assets/rain.PNG";
-  const IMG_TREES  = "assets/trees.PNG";
-  const IMG_SMOKE  = "assets/smoke.PNG";
+/**
+ * Forest Loss & Bird Extinction Risk Visualization
+ *
+ * Integration change: converted from self-executing IIFE to a named
+ * function initForestRLIViz(mountId) so it can be mounted to any container.
+ * All rendering logic is identical to the original.
+ */
+
+function initForestRLIViz(mountId) {
+  const CSV_FILE  = "data/final_global_forest_rli_2001_2023.csv";
+  const IMG_BIRDS = "assets/birds.PNG";
+  const IMG_RAIN  = "assets/rain.PNG";
+  const IMG_TREES = "assets/trees.PNG";
+  const IMG_SMOKE = "assets/smoke.PNG";
 
   const minSmoke = 0.10, maxSmoke = 0.60;
-  const minRain  = 0.05, maxRain  = 0.50; 
+  const minRain  = 0.05, maxRain  = 0.50;
 
   const blendPx = 160;
 
@@ -18,34 +26,22 @@
   const sceneW = W - margin.l - margin.r;
   const sceneH = 560;
 
- 
   const clamp01 = (x) => Math.max(0, Math.min(1, x));
   const compress = (t, lo, hi) => lo + t * (hi - lo);
 
+  const mount = d3.select('#' + mountId);
+  mount.style('padding', '0');
 
-  const mount = d3.select("body")
-    .append("section")
-    .attr("class", "forest-rli-page")
-    .style("padding", "40px 0");
-
-  mount.append("div")
-    .attr("class", "container")
-    .html(`
-      <h2 style="font-family: Space Grotesk, system-ui; margin-bottom: 8px;">
-        Forest Loss & Bird Extinction Risk
-      </h2>
-      </p>
+  mount.html(`
+    <div id="forest-rli-inner" style="max-width:1100px; margin: 0 auto;">
       <div id="forest-rli-container" style="max-width:1100px;"></div>
-
       <div class="controls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
         <button id="forestPrev" class="btn btn-outline-secondary btn-sm">◀</button>
         <span class="badge text-bg-light" style="font-size:14px;">
           <b id="forestYearLabel"></b>
         </span>
         <button id="forestNext" class="btn btn-outline-secondary btn-sm">▶</button>
-
         <input id="forestYearSlider" type="range" style="min-width:320px;" />
-
         <span class="badge text-bg-light" style="font-weight:400;">
           Forest loss: <span id="forestLossLabel"></span>
         </span>
@@ -53,8 +49,8 @@
           RLI: <span id="forestRliLabel"></span> · Risk: <span id="forestRiskLabel"></span>
         </span>
       </div>
-    `);
-
+    </div>
+  `);
 
   const svg = d3.select("#forest-rli-container")
     .append("svg")
@@ -164,7 +160,6 @@
       .attr("x2", x2).attr("y2", 0);
   }
 
-  // load data + interaction
   d3.csv(CSV_FILE, d3.autoType).then((data) => {
     data.sort((a, b) => a.year - b.year);
 
@@ -244,7 +239,6 @@
 
     render(data[idx]);
   }).catch((err) => {
-    // debug line just in case
     console.error(err);
     d3.select("#forest-rli-container")
       .append("div")
@@ -252,5 +246,4 @@
       .style("padding", "12px 0")
       .text("Failed to load forest/RLI visualization data or assets. Check console for details.");
   });
-})();
-        
+}

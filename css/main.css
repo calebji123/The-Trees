@@ -1,0 +1,79 @@
+/* =============================================
+   MAIN CSS — Our Warming World
+   Design tokens from v0 mockup
+   ============================================= */
+
+:root {
+  --bg:        #f5f0e8;
+  --bg-card:   #faf7f2;
+  --bg-warm:   #fefcf9;
+  --fg:        #2c2417;
+  --fg-mid:    #6b5e4f;
+  --fg-muted:  #9a8d80;
+  --primary:   #3a5a40;
+  --accent:    #c17817;
+  --border:    #d6cebf;
+  --secondary: #ebe5d9;
+
+  /* Aliases used by existing viz CSS */
+  --cs-sand:        #f5f0e8;
+  --cs-cream:       #faf7f2;
+  --cs-warm-white:  #fefcf9;
+  --cs-earth:       #3d3229;
+  --cs-earth-mid:   #6b5d50;
+  --cs-earth-light: #9a8d80;
+  --cs-clay:        #c4a882;
+  --cs-terracotta:  #c45d3e;
+  --cs-forest:      #2d6a4f;
+  --cs-forest-light:#52b788;
+  --cs-ocean:       #1b6b93;
+  --cs-ocean-light: #4da8c4;
+  --cs-amber:       #d4860b;
+  --cs-rose:        #b5485d;
+  --cs-accent:      #c45d3e;
+
+  --spiral-ink:   #101820;
+  --spiral-muted: #5b6b7a;
+  --spiral-paper: #f4f1ec;
+  --spiral-cool:  #2a7bbd;
+  --spiral-warm:  #c82838;
+
+  --globe-cream:       #faf7f2;
+  --globe-earth:       #3d3229;
+  --globe-earth-light: #9a8d80;
+  --globe-terracotta:  #c45d3e;
+  --globe-amber:       #d4860b;
+  --globe-forest:      #2d6a4f;
+  --globe-clay:        #c4a882;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', 'Source Sans 3', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+h1, h2, h3, h4 { margin: 0; }
+p { margin: 0; }
+button { cursor: pointer; }
+img { display: block; }

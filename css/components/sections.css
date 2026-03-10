@@ -1,0 +1,323 @@
+/* =============================================
+   SECTIONS — Narrative, Stats, Parallax, Dividers, Progress Nav
+   ============================================= */
+
+/* ── Page section wrapper ── */
+.page-section {
+  padding: 5rem 1.5rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* ── Narrative text block ── */
+.narrative {
+  max-width: 660px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.narrative--left { text-align: left; margin-left: 0; }
+
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.section-eyebrow svg {
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--accent);
+}
+
+.section-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 700;
+  color: var(--fg);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.section-body {
+  margin-top: 2rem;
+  font-size: 1.07rem;
+  color: var(--fg-mid);
+  line-height: 1.75;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.narrative--left .section-body {
+  margin-left: 0;
+}
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Stats row ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem 3rem;
+  max-width: 860px;
+  margin: 4rem auto 0;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-number {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 900;
+  color: var(--fg);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  min-height: 1.2em;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  max-width: 160px;
+  line-height: 1.4;
+}
+
+/* ── Section divider ── */
+.section-divider {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ── Parallax break ── */
+.parallax-break {
+  position: relative;
+  height: 50vh;
+  min-height: 320px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parallax-bg {
+  position: absolute;
+  inset: -20%;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  will-change: transform;
+}
+
+.parallax-dark {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 22, 18, 0.55);
+}
+
+.parallax-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 1.5rem;
+  max-width: 700px;
+}
+
+.parallax-quote {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: #f5f0e8;
+  line-height: 1.3;
+  font-style: italic;
+}
+
+.parallax-sub {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: rgba(245, 240, 232, 0.65);
+}
+
+/* ── Viz container ── */
+.viz-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ── Emissions policy highlight ── */
+.emissions-highlight {
+  max-width: 900px;
+  margin: 4rem auto 0;
+  padding: 2rem 2.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.emissions-highlight h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.country-spotlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.country-spotlight {
+  padding: 1.5rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.cs-flag {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.cs-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 0.25rem;
+}
+
+.cs-since {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.cs-desc {
+  font-size: 0.85rem;
+  color: var(--fg-mid);
+  line-height: 1.55;
+}
+
+.cs-trend {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ── Hope section ── */
+.cta-group {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  background: var(--primary);
+  color: #f5f0e8;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: var(--secondary); }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.footer-logo {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--fg);
+}
+
+.footer-desc {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.footer-meta {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.footer-copy {
+  margin-top: 1rem;
+  font-size: 0.7rem;
+  color: rgba(107, 94, 79, 0.5);
+}
+
+@media (max-width: 640px) {
+  .page-section { padding: 3.5rem 1rem; }
+  .stats-row { grid-template-columns: 1fr; gap: 2rem; }
+  .country-spotlights { grid-template-columns: 1fr; }
+  .parallax-break { height: 40vh; background-attachment: scroll !important; }
+}
