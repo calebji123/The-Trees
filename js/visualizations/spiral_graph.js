@@ -65,9 +65,117 @@ class SpiralGraph {
 		this.prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		this.currentYear = null;
 		this.timelineSlider = null;
+		this.scrollDepthProgress = 0;
+		this.lastRenderedDepthProgress = -1;
+		this.depthZoomStrength = 3.45;
+		this.depthZoomOffset = 46;
+		this.depthZoomPower = 1.75;
+		this.lineZoomStrength = 1.75;
+		this.globeZoomStrength = 1.35;
+		this.globeZoomPower = 1.35;
+		this.centerGlobeSizeFactor = 0.78;
 
 		this.initLayout();
+		this.initScrollDepthInteraction();
 		this.loadData();
+	}
+
+	initScrollDepthInteraction() {
+		if (this.prefersReducedMotion) {
+			return;
+		}
+
+		window.addEventListener("spiral:scroll-progress", (event) => {
+			if (!event || !event.detail) {
+				return;
+			}
+			const trackProgress = Number(event.detail.progress);
+			if (!Number.isFinite(trackProgress)) {
+				return;
+			}
+
+			const depthProgress = this.computeDepthProgress(trackProgress);
+			if (Math.abs(depthProgress - this.lastRenderedDepthProgress) < 0.004) {
+				return;
+			}
+
+			this.scrollDepthProgress = depthProgress;
+			this.lastRenderedDepthProgress = depthProgress;
+
+			if (this.currentYear !== null) {
+				this.render(this.currentYear, false);
+			}
+		});
+	}
+
+	computeDepthProgress(trackProgress) {
+		// Reserve runway at the end where the zoom remains stable at max.
+		const start = 0.005;
+		const end = 0.86;
+		const normalized = (trackProgress - start) / (end - start);
+		return Math.max(0, Math.min(1, normalized));
+	}
+
+	initCenterGlobeOverlay() {
+		const overlay = document.getElementById('spiral-center-globe');
+		if (!overlay || typeof GlobeVis === 'undefined') return;
+
+		this.centerGlobeOverlay = overlay;
+
+		const positionOverlay = () => {
+			const svgEl = this.svg.node();
+			const cardEl = overlay.parentElement;
+			if (!svgEl || !cardEl) return;
+			const svgRect = svgEl.getBoundingClientRect();
+			const cardRect = cardEl.getBoundingClientRect();
+			if (svgRect.width === 0) return;
+			const displayedScale = Math.min(svgRect.width / this.width, svgRect.height / this.height);
+			const holeDiam = Math.round(this.centerHoleRadius * 2 * displayedScale * this.centerGlobeSizeFactor);
+			const hcx = (svgRect.left - cardRect.left) + svgRect.width / 2;
+			const hcy = (svgRect.top - cardRect.top) + svgRect.height / 2;
+			overlay.style.width  = holeDiam + 'px';
+			overlay.style.height = holeDiam + 'px';
+			overlay.style.left   = (hcx - holeDiam / 2) + 'px';
+			overlay.style.top    = (hcy - holeDiam / 2) + 'px';
+		};
+
+		window.addEventListener('resize', positionOverlay, { passive: true });
+
+		requestAnimationFrame(() => requestAnimationFrame(() => {
+			const svgEl = this.svg.node();
+			const svgRect = svgEl.getBoundingClientRect();
+			const displayedScale = svgRect.width > 0
+				? Math.min(svgRect.width / this.width, svgRect.height / this.height)
+				: 0.37;
+			const holeDiam = Math.round(this.centerHoleRadius * 2 * displayedScale * this.centerGlobeSizeFactor);
+			const globe = new GlobeVis('spiral-center-globe', holeDiam, { embedded: true });
+			globe.init().catch(err => console.error('Center globe failed:', err));
+			window.globeVis = globe;
+			positionOverlay();
+		}));
+	}
+
+	depthBiasForRadius(baseRadius) {
+		const radiusRange = Math.max(1, this.outerRadius - this.innerRadius);
+		const normalizedRadius = Math.max(0, Math.min(1, (baseRadius - this.innerRadius) / radiusRange));
+		// 0.35 floor ensures inner rings still expand; outer rings reach 1.0
+		return 0.35 + 0.65 * Math.pow(normalizedRadius, this.depthZoomPower);
+	}
+
+	lineZoomMultiplier(depthBias) {
+		return 1 + this.scrollDepthProgress * (0.2 + depthBias * this.lineZoomStrength);
+	}
+
+	updateCenterGlobeZoom() {
+		// Match the innermost ring's depth scale exactly so globe and inner spiral stay in sync
+		const innerBias = this.depthBiasForRadius(this.innerRadius);
+		const globeScale = 1 + this.scrollDepthProgress * this.depthZoomStrength * innerBias;
+		if (this.centerGlobeOverlay) {
+			this.centerGlobeOverlay.style.transform = `scale(${globeScale})`;
+		}
+		// SVG groups are now empty; clear stale transforms
+		this.globeGroup.attr('transform', null);
+		this.holeGroup.attr('transform', null);
 	}
 
 	initLayout() {
@@ -97,9 +205,6 @@ class SpiralGraph {
 		this.holeGroup = this.chart.append("g").attr("class", "center-hole");
 		this.globeGroup = this.chart.append("g").attr("class", "center-globe");
 		this.hoverGroup = this.chart.append("g").attr("class", "hover-points");
-
-		this.globeRadius = Math.max(18, (this.centerHoleRadius - 14) * 0.6);
-		this.renderCenterGlobe();
 	}
 
 	renderCenterGlobe() {
@@ -218,6 +323,12 @@ class SpiralGraph {
 				.range([-this.tempAmplitude, this.tempAmplitude])
 				.clamp(true);
 
+			this.strokeWidthScale = d3
+				.scaleLinear()
+				.domain([this.temperatureExtent[0], this.temperatureExtent[1]])
+				.range([1.2, 4.4])
+				.clamp(true);
+
 			this.baselineLine = d3
 				.line()
 				.x((d) => d.x)
@@ -229,6 +340,7 @@ class SpiralGraph {
 			if (this.timelineSlider) {
 				this.timelineSlider.play();
 			}
+			this.initCenterGlobeOverlay();
 		});
 	}
 
@@ -290,7 +402,9 @@ class SpiralGraph {
 			.text((d) => d);
 		titleSelection.exit().remove();
 
-		const labelSelection = this.overlay.selectAll("text.spiral-legend-label").data(["Temperature anomaly (°C)"]);
+		const labelSelection = this.overlay
+			.selectAll("text.spiral-legend-label")
+			.data(["Temperature anomaly (°C) · warmer = thicker"]);
 		const labelEnter = labelSelection
 			.enter()
 			.append("text")
@@ -343,18 +457,28 @@ class SpiralGraph {
 
 	polarPosition(point) {
 		const angle = (point.t / this.monthsPerRotation) * Math.PI * 2 - Math.PI / 2;
-		const radius = this.radiusScale(point.t) + this.tempOffsetScale(point.temperature);
+		const baseRadius = this.radiusScale(point.t);
+		const tempOffset = this.tempOffsetScale(point.temperature);
+		const depthBias = this.depthBiasForRadius(baseRadius);
+		const depthScale = 1 + this.scrollDepthProgress * this.depthZoomStrength * depthBias;
+		const depthOffset = this.scrollDepthProgress * this.depthZoomOffset * depthBias;
+		const radius = (baseRadius + tempOffset) * depthScale + depthOffset;
 		return {
 			x: Math.cos(angle) * radius,
 			y: Math.sin(angle) * radius,
 			angle,
-			radius
+			radius,
+			depthBias
 		};
 	}
 
 	baselinePosition(point) {
 		const angle = (point.t / this.monthsPerRotation) * Math.PI * 2 - Math.PI / 2;
-		const radius = this.radiusScale(point.t) + this.tempOffsetScale(0);
+		const baseRadius = this.radiusScale(point.t);
+		const depthBias = this.depthBiasForRadius(baseRadius);
+		const depthScale = 1 + this.scrollDepthProgress * this.depthZoomStrength * depthBias;
+		const depthOffset = this.scrollDepthProgress * this.depthZoomOffset * depthBias;
+		const radius = (baseRadius + this.tempOffsetScale(0)) * depthScale + depthOffset;
 		return {
 			x: Math.cos(angle) * radius,
 			y: Math.sin(angle) * radius
@@ -392,7 +516,6 @@ class SpiralGraph {
 		const segmentEnter = segmentSelection
 			.enter()
 			.append("path")
-			.attr("stroke-width", 1.6)
 			.attr("stroke-linecap", "round")
 			.attr("stroke-linejoin", "round")
 			.attr("fill", "none")
@@ -400,8 +523,11 @@ class SpiralGraph {
 		segmentSelection
 			.merge(segmentEnter)
 			.attr("d", ([a, b]) => `M${a.x},${a.y} L${b.x},${b.y}`)
-			.attr("stroke", ([, b]) => this.colorScale(b.temperature));
+			.attr("stroke", ([, b]) => this.colorScale(b.temperature))
+			.attr("stroke-width", ([, b]) => this.strokeWidthScale(b.temperature) * this.lineZoomMultiplier(b.depthBias));
 		segmentSelection.exit().remove();
+
+		this.updateCenterGlobeZoom();
 
 		const segments = this.segmentGroup.selectAll("path");
 		segments.each(function () {

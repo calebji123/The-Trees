@@ -12,10 +12,12 @@
  */
 
 class GlobeVis {
-  constructor(containerId) {
+  constructor(containerId, size = 600, options = {}) {
     this.containerId = containerId;
-    this.width = 600;
-    this.height = 600;
+    this.width = size;
+    this.height = size;
+    this.projectionScale = Math.round(280 * (size / 600));
+    this.embedded = options.embedded || false;
     this.selectedRegion = null;
     this.isPaused = false;
     this.rotationTimer = null;
@@ -40,14 +42,18 @@ class GlobeVis {
    */
   buildHTML() {
     const container = document.getElementById(this.containerId);
-    container.innerHTML = `
-      <h1 class="globe-title">Global Deforestation Hotspots</h1>
-      <p class="globe-subtitle">Drag to rotate. Click a hotspot to explore historical data.</p>
+    if (this.embedded) {
+      container.innerHTML = `<div id="globe-container" style="width:${this.width}px;height:${this.height}px;"></div>`;
+    } else {
+      container.innerHTML = `
+        <h1 class="globe-title">Global Deforestation Hotspots</h1>
+        <p class="globe-subtitle">Drag to rotate. Click a hotspot to explore historical data.</p>
 
-      <div class="globe-wrapper">
-        <div id="globe-container" class="globe-container"></div>
-      </div>
-    `;
+        <div class="globe-wrapper">
+          <div id="globe-container" class="globe-container"></div>
+        </div>
+      `;
+    }
   }
 
   /**
@@ -153,7 +159,7 @@ class GlobeVis {
       .attr('aria-label', 'Globe with deforestation hotspots');
 
     this.projection = d3.geoOrthographic()
-      .scale(280)
+      .scale(this.projectionScale)
       .translate([this.width / 2, this.height / 2])
       .clipAngle(90)
       .rotate([-20, -20]);
@@ -163,7 +169,7 @@ class GlobeVis {
     this.svg.append('circle')
       .attr('cx', this.width / 2)
       .attr('cy', this.height / 2)
-      .attr('r', 280)
+      .attr('r', this.projectionScale)
       .attr('fill', '#4da8c4')
       .attr('opacity', 0.25);
 
@@ -211,8 +217,8 @@ class GlobeVis {
   drawHotspots() {
     const self = this;
     if (!this.data || this.data.length === 0) return;
-    const maxR = 28;
-    const minR = 12;
+    const maxR = Math.round(28 * this.width / 600);
+    const minR = Math.round(12 * this.width / 600);
     const scaleR = d => minR + (maxR - minR) * (d.intensity ?? 0.5);
 
     const hotspots = this.hotspotGroup.selectAll('.globe-hotspot-group')
