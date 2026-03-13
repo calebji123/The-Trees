@@ -24,31 +24,6 @@
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
   function easeInOut(t)     { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
 
-  // ── Scroll gate ───────────────────────────────────────────────────────────
-  // Gates wheel/touch events at boundary points until the current scroll
-  // gesture fully stops (no wheel event for 150ms), killing trackpad momentum.
-  let gating       = false;
-  let gateTimer    = null;
-  let prevProgress = -1;
-
-  function startGate() { gating = true; }
-
-  function isTrackSticky() {
-    const r = track.getBoundingClientRect();
-    return r.top <= 0 && r.bottom >= window.innerHeight;
-  }
-
-  window.addEventListener('wheel', (e) => {
-    if (!gating || !isTrackSticky()) return;
-    e.preventDefault();
-    clearTimeout(gateTimer);
-    gateTimer = setTimeout(() => { gating = false; }, 150);
-  }, { passive: false });
-
-  window.addEventListener('touchmove', (e) => {
-    if (gating && isTrackSticky()) e.preventDefault();
-  }, { passive: false });
-
   function update() {
     const rect       = track.getBoundingClientRect();
     const scrollable = track.offsetHeight - window.innerHeight;
@@ -58,10 +33,6 @@
     window.dispatchEvent(new CustomEvent('spiral:scroll-progress', {
       detail: { progress }
     }));
-
-    // Gate momentum at spiral entry
-    if (prevProgress !== -1 && prevProgress < 0.005 && progress >= 0.005) startGate();
-    prevProgress = progress;
 
     // Final focus phase: fade spiral/timeline out quickly, then hold fully faded state.
     const fadeStart = 0.76;
@@ -90,7 +61,6 @@
   }
 
   window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('load', update);
   update();
-
-  // No scene-globe observer while transition is disabled.
 })();

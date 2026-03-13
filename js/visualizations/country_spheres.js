@@ -8,9 +8,9 @@ const csWrapper = d3.select('#country-spheres')
 
 const csHeader = csWrapper.append('div').attr('id', 'cs-header');
 csHeader.append('h1').attr('id', 'cs-main-title')
-  .html('Our Warming World<br><em>CO₂ Per Capita</em>');
+  .html('<em>CO₂ Emissions</em>');
 csHeader.append('p')
-  .text('Each bubble represents a country — sized by emissions, positioned geographically, colored by continent. Click any country for its full story.');
+  .text('Each bubble represents a country, sized by emissions, positioned geographically, coloured by continent. Click any country for its full story.');
 
 const csMetricToggle = csWrapper.append('div').attr('id', 'cs-metric-toggle');
 csMetricToggle.append('button').attr('class', 'cs-metric-btn active').attr('data-metric', 'per_capita').text('Per Capita');
