@@ -44,12 +44,16 @@
 
     panel.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
+    const progressNav = document.getElementById('progress-nav');
+    if (progressNav) progressNav.style.display = 'none';
   }
 
 
   function closePanel() {
     panel.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+    const progressNav = document.getElementById('progress-nav');
+    if (progressNav) progressNav.style.display = '';
     // Tell globe to reset its selection and resume rotation
     if (window.globeVis) {
       window.globeVis.closePopup(); // resets isPaused and restarts rotation

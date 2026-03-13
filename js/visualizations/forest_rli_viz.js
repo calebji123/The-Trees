@@ -44,16 +44,16 @@ function renderForestRLIPanelViz(mountId, regionData) {
     <div style="width:100%;">
       <div id="${panelId}-svg-wrap"></div>
 
-      <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
-        <button id="${prevId}" class="btn btn-outline-secondary btn-sm">◀</button>
-        <span style="min-width:48px; font-weight:600; color:#3d3229;" id="${yearId}"></span>
-        <button id="${nextId}" class="btn btn-outline-secondary btn-sm">▶</button>
-        <input id="${sliderId}" type="range" style="flex:1; min-width:120px;" />
+      <div style="display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+        <button id="${prevId}" style="background:var(--bg-card,#faf7f2); border:1px solid var(--border,#d6cebf); color:var(--fg,#2c2417); border-radius:6px; width:32px; height:32px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:background 0.15s, border-color 0.15s;">◀</button>
+        <span style="min-width:52px; font-weight:700; color:var(--fg,#2c2417); font-family:'Playfair Display',Georgia,serif; font-size:15px; text-align:center;" id="${yearId}"></span>
+        <button id="${nextId}" style="background:var(--bg-card,#faf7f2); border:1px solid var(--border,#d6cebf); color:var(--fg,#2c2417); border-radius:6px; width:32px; height:32px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:background 0.15s, border-color 0.15s;">▶</button>
+        <input id="${sliderId}" type="range" class="forest-rli-slider" style="flex:1; min-width:120px; height:6px; accent-color:var(--primary,#3a5a40); cursor:pointer;" />
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:3px; margin-top:4px; font-size:13px; color:#5e554d;">
-        <div>Forest loss: <span id="${forestId}"></span></div>
-        <div>RLI change: <span id="${rliId}"></span></div>
+      <div style="display:flex; flex-direction:row; gap:16px; margin-top:8px; font-size:13px; color:var(--fg-mid,#6b5e4f);">
+        <div style="display:flex; align-items:center; gap:4px;"><span style="color:var(--accent,#c17817); font-weight:600;">Forest loss:</span> <span id="${forestId}" style="font-weight:500;"></span></div>
+        <div style="display:flex; align-items:center; gap:4px;"><span style="color:var(--primary,#3a5a40); font-weight:600;">Red List Index change:</span> <span id="${rliId}" style="font-weight:500;"></span></div>
       </div>
     </div>
   `);
