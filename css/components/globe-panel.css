@@ -190,3 +190,41 @@
   }
   .globe-panel-backdrop { display: none; }
 }
+
+
+.gsp-bird-viz-wrap {
+  padding: 0 1rem 1rem;
+}
+
+#gsp-bird-viz {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem 0.6rem 0.65rem;
+  overflow: hidden;
+}
+
+#gsp-bird-viz svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gsp-bird-viz-wrap .gsp-chart-heading {
+  margin-bottom: 0.55rem;
+}
+
+.gsp-chart-wrap {
+  padding: 0 1rem;
+}
+
+.gsp-legend {
+  gap: 1rem;
+  padding: 0.45rem 1rem 0.9rem;
+}
+
+.gsp-forest-context {
+  margin: 0 1rem 1rem;
+  padding: 1rem;
+}
