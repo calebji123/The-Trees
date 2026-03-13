@@ -61,21 +61,139 @@ class GlobeVis {
    */
   async loadData() {
     try {
-      const rawData = await d3.csv('data/deforestation.csv');
+      const [rawData, rawRLI] = await Promise.all([
+        d3.csv('data/deforestation.csv'),
+        d3.csv('data/red-list-index.csv', d3.autoType)
+      ]);
 
+      const rliByEntityYear = new Map();
+      rawRLI.forEach(row => {
+        const entity = String(row.Entity || '').trim();
+        const year = +row.Year;
+        const rli = +row['Red List Index'];
+
+        if (entity && !Number.isNaN(year) && !Number.isNaN(rli)) {
+          rliByEntityYear.set(`${entity}__${year}`, rli);
+        }
+      });
+
+      const regionToEntities = {
+        "Amazon": [
+          "Brazil", "Peru", "Colombia", "Bolivia",
+          "Ecuador", "Venezuela", "Guyana", "Suriname"
+        ],
+
+        "Congo Basin": [
+          "Democratic Republic of the Congo",
+          "Republic of the Congo",
+          "Cameroon",
+          "Central African Republic",
+          "Gabon",
+          "Equatorial Guinea"
+        ],
+
+        "Southeast Asia": [
+          "Indonesia", "Malaysia", "Thailand", "Vietnam",
+          "Cambodia", "Laos", "Myanmar", "Philippines",
+          "Brunei", "Singapore", "Timor-Leste"
+        ],
+
+        "Central America": [
+          "Belize", "Guatemala", "Honduras",
+          "El Salvador", "Nicaragua", "Costa Rica", "Panama"
+        ],
+
+        "Madagascar": [
+          "Madagascar"
+        ],
+
+        "Indonesia": [
+          "Indonesia"
+        ],
+
+        "West Africa": [
+          "Benin", "Burkina Faso", "Cape Verde",
+          "Cote d'Ivoire", "Gambia", "Ghana", "Guinea",
+          "Guinea-Bissau", "Liberia", "Mali", "Mauritania",
+          "Niger", "Nigeria", "Senegal", "Sierra Leone", "Togo"
+        ],
+
+        "Papua New Guinea": [
+          "Papua New Guinea"
+        ],
+
+        "Mexico": [
+          "Mexico"
+        ],
+
+        "Siberia": [
+          "Russia"
+        ],
+
+        "Australia": [
+          "Australia"
+        ],
+
+        "Chocó-Darién": [
+          "Colombia", "Panama", "Ecuador"
+        ],
+
+        "Eastern Himalayas": [
+          "India", "Nepal", "Bhutan", "China"
+        ],
+
+        "Atlantic Forest": [
+          "Brazil", "Paraguay", "Argentina"
+        ],
+
+        "Mekong Delta": [
+          "Vietnam", "Cambodia"
+        ]
+      };
+
+      // -----------------------------
+      // yearly average RLI for a region
+      // -----------------------------
+      const getRegionRLI = (regionName, year) => {
+        const direct = rliByEntityYear.get(`${regionName}__${year}`);
+        if (direct != null) return direct;
+
+        const entities = regionToEntities[regionName];
+        if (!entities || !entities.length) return null;
+
+        const vals = entities
+          .map(entity => rliByEntityYear.get(`${entity}__${year}`))
+          .filter(v => v != null && !Number.isNaN(v));
+
+        if (!vals.length) return null;
+        return d3.mean(vals);
+      };
+
+      // -----------------------------
+      // Build region time series
+      // -----------------------------
       const grouped = d3.group(rawData, d => d.region);
 
       this.data = Array.from(grouped, ([region, values]) => ({
         name: region,
         lat: +values[0].lat,
         lon: +values[0].lon,
-        timeSeries: values.map(d => ({
-          year: +d.year,
-          forestCover: +d.forestCover,
-          birdSpecies: +d.birdSpecies
-        }))
+        timeSeries: values
+          .map(d => {
+            const year = +d.year;
+            return {
+              year,
+              forestCover: +d.forestCover,
+              birdSpecies: +d.birdSpecies,
+              rli: getRegionRLI(region, year)
+            };
+          })
+          .sort((a, b) => a.year - b.year)
       }));
 
+      // -----------------------------
+      // Forest loss intensity for hotspot
+      // -----------------------------
       let maxForestLoss = 0;
       this.data.forEach(r => {
         const latest = r.timeSeries[r.timeSeries.length - 1];
@@ -83,68 +201,59 @@ class GlobeVis {
         r.forestLoss = first.forestCover - latest.forestCover;
         if (r.forestLoss > maxForestLoss) maxForestLoss = r.forestLoss;
       });
+
       this.maxForestLoss = maxForestLoss || 1;
       this.data.forEach(r => {
         r.intensity = r.forestLoss / this.maxForestLoss;
       });
+
+      console.log("Globe data with RLI merged:", this.data);
+
     } catch (error) {
       console.error('Error loading CSV:', error);
+
       this.data = [
-        { name: "Amazon", lat: -3.4653, lon: -62.2159, forestLoss: 30,
+        {
+          name: "Amazon",
+          lat: -3.4653,
+          lon: -62.2159,
           timeSeries: [
-            { year: 2000, forestCover: 100, birdSpecies: 1300 },
-            { year: 2005, forestCover: 92, birdSpecies: 1200 },
-            { year: 2010, forestCover: 86, birdSpecies: 1110 },
-            { year: 2015, forestCover: 79, birdSpecies: 1030 },
-            { year: 2020, forestCover: 74, birdSpecies: 975 },
-            { year: 2024, forestCover: 70, birdSpecies: 950 }
+            { year: 2000, forestCover: 100, birdSpecies: 1300, rli: 0.88 },
+            { year: 2005, forestCover: 94, birdSpecies: 1250, rli: 0.86 },
+            { year: 2010, forestCover: 88, birdSpecies: 1180, rli: 0.84 },
+            { year: 2015, forestCover: 82, birdSpecies: 1100, rli: 0.82 },
+            { year: 2020, forestCover: 75, birdSpecies: 1020, rli: 0.80 },
+            { year: 2024, forestCover: 70, birdSpecies: 950,  rli: 0.78 }
           ]
         },
-        { name: "Congo Basin", lat: 0.228, lon: 21.7587, forestLoss: 23,
+        {
+          name: "Congo Basin",
+          lat: 0.228,
+          lon: 21.7587,
           timeSeries: [
-            { year: 2000, forestCover: 100, birdSpecies: 1000 },
-            { year: 2005, forestCover: 96, birdSpecies: 960 },
-            { year: 2010, forestCover: 92, birdSpecies: 920 },
-            { year: 2015, forestCover: 88, birdSpecies: 876 },
-            { year: 2020, forestCover: 82, birdSpecies: 840 },
-            { year: 2024, forestCover: 77, birdSpecies: 810 }
-          ]
-        },
-        { name: "Southeast Asia", lat: 2.5, lon: 112.5, forestLoss: 45,
-          timeSeries: [
-            { year: 2000, forestCover: 100, birdSpecies: 800 },
-            { year: 2005, forestCover: 90, birdSpecies: 730 },
-            { year: 2010, forestCover: 80, birdSpecies: 660 },
-            { year: 2015, forestCover: 70, birdSpecies: 590 },
-            { year: 2020, forestCover: 62, birdSpecies: 530 },
-            { year: 2024, forestCover: 55, birdSpecies: 490 }
-          ]
-        },
-        { name: "Madagascar", lat: -18.7669, lon: 46.8691, forestLoss: 43,
-          timeSeries: [
-            { year: 2000, forestCover: 100, birdSpecies: 280 },
-            { year: 2005, forestCover: 91, birdSpecies: 255 },
-            { year: 2010, forestCover: 82, birdSpecies: 232 },
-            { year: 2015, forestCover: 74, birdSpecies: 210 },
-            { year: 2020, forestCover: 65, birdSpecies: 192 },
-            { year: 2024, forestCover: 57, birdSpecies: 178 }
-          ]
-        },
-        { name: "Indonesia", lat: -2.5, lon: 118.0, forestLoss: 40,
-          timeSeries: [
-            { year: 2000, forestCover: 100, birdSpecies: 720 },
-            { year: 2005, forestCover: 91, birdSpecies: 660 },
-            { year: 2010, forestCover: 82, birdSpecies: 600 },
-            { year: 2015, forestCover: 75, birdSpecies: 550 },
-            { year: 2020, forestCover: 68, birdSpecies: 515 },
-            { year: 2024, forestCover: 60, birdSpecies: 485 }
+            { year: 2000, forestCover: 100, birdSpecies: 1000, rli: 0.91 },
+            { year: 2005, forestCover: 97,  birdSpecies: 980,  rli: 0.89 },
+            { year: 2010, forestCover: 93,  birdSpecies: 950,  rli: 0.87 },
+            { year: 2015, forestCover: 88,  birdSpecies: 910,  rli: 0.85 },
+            { year: 2020, forestCover: 82,  birdSpecies: 860,  rli: 0.83 },
+            { year: 2024, forestCover: 77,  birdSpecies: 810,  rli: 0.81 }
           ]
         }
       ];
+
+      this.data.forEach(r => {
+        const latest = r.timeSeries[r.timeSeries.length - 1];
+        const first = r.timeSeries[0];
+        r.forestLoss = first.forestCover - latest.forestCover;
+      });
+
       this.maxForestLoss = Math.max(...this.data.map(r => r.forestLoss), 1);
-      this.data.forEach(r => { r.intensity = r.forestLoss / this.maxForestLoss; });
+      this.data.forEach(r => {
+        r.intensity = r.forestLoss / this.maxForestLoss;
+      });
     }
   }
+
 
   /**
    * Setup SVG and projection

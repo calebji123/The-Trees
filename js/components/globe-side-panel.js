@@ -33,23 +33,27 @@
         <span class="gsp-stat-lbl">Bird species decline</span>
       </div>
     `;
-
-    // Draw region chart via globeVis (targets #globe-chart in panel)
+    if (typeof renderForestRLIPanelViz === 'function') {
+      renderForestRLIPanelViz('gsp-bird-viz', data);
+    }
     if (window.globeVis) {
       window.globeVis.drawChart(data);
-      // globe is already paused by selectRegion() before this event fires
     }
 
-    // Draw global forest RLI context chart
     drawForestContextChart();
 
     panel.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
+    const progressNav = document.getElementById('progress-nav');
+    if (progressNav) progressNav.style.display = 'none';
   }
+
 
   function closePanel() {
     panel.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+    const progressNav = document.getElementById('progress-nav');
+    if (progressNav) progressNav.style.display = '';
     // Tell globe to reset its selection and resume rotation
     if (window.globeVis) {
       window.globeVis.closePopup(); // resets isPaused and restarts rotation

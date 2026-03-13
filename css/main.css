@@ -47,6 +47,43 @@
   --globe-clay:        #c4a882;
 }
 
+/* Forest RLI slider — warm earthy track + green thumb */
+.forest-rli-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border, #d6cebf);
+  border-radius: 3px;
+  outline: none;
+}
+.forest-rli-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary, #3a5a40);
+  border: 2px solid var(--bg-card, #faf7f2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.forest-rli-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+.forest-rli-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary, #3a5a40);
+  border: 2px solid var(--bg-card, #faf7f2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+.forest-rli-slider::-moz-range-track {
+  background: var(--border, #d6cebf);
+  height: 6px;
+  border-radius: 3px;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
