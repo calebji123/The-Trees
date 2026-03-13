@@ -13,9 +13,11 @@
 (function () {
   const track         = document.getElementById('spiral-globe-track');
   const spiral        = document.getElementById('scene-spiral');
+  const spiralSvg     = document.getElementById('spiral_graph');
   const globe         = document.getElementById('scene-globe');
   const hint          = document.querySelector('.spiral-scroll-hint');
   const defoNarrative = document.querySelector('.deforestation-narrative');
+  const timeline      = document.getElementById('timeline_graph');
 
   if (!track || !spiral || !globe) return;
 
@@ -53,72 +55,42 @@
     const scrolled   = clamp(-rect.top, 0, scrollable);
     const progress   = scrolled / scrollable; // 0 → 1
 
-    // Gate momentum at spiral entry and at globe reveal
-    if (prevProgress !== -1) {
-      if (prevProgress < 0.005 && progress >= 0.005) startGate();
-      if (prevProgress < 0.68  && progress >= 0.68)  startGate();
-    }
+    window.dispatchEvent(new CustomEvent('spiral:scroll-progress', {
+      detail: { progress }
+    }));
+
+    // Gate momentum at spiral entry
+    if (prevProgress !== -1 && prevProgress < 0.005 && progress >= 0.005) startGate();
     prevProgress = progress;
 
-    // Scroll hint
-    if (hint) {
-      hint.classList.toggle('visible', progress > 0.02 && progress < 0.18);
+    // Final focus phase: fade spiral/timeline out quickly, then hold fully faded state.
+    const fadeStart = 0.76;
+    const fadeEnd = 0.9;
+    const stableT = clamp((progress - fadeStart) / (fadeEnd - fadeStart), 0, 1);
+
+    if (timeline) {
+      timeline.style.opacity = String(1 - stableT);
+      timeline.style.pointerEvents = stableT > 0.5 ? 'none' : 'auto';
+    }
+    if (spiralSvg) {
+      spiralSvg.style.opacity = String(1 - stableT);
     }
 
-    if (progress < 0.20) {
-      // ── Phase 1: Spiral at rest ──────────────────────────────────────
-      spiral.style.opacity      = '1';
-      spiral.style.transform    = 'scale(1)';
-      spiral.style.pointerEvents = 'auto';
-      globe.style.opacity       = '0';
-      globe.style.transform     = 'scale(0.97)';
-      globe.style.pointerEvents = 'none';
-      if (defoNarrative) defoNarrative.classList.remove('visible');
-
-    } else if (progress < 0.70) {
-      // ── Phase 2: Cross-fade ──────────────────────────────────────────
-      const t    = (progress - 0.20) / 0.50;
-      const ease = easeInOut(t);
-
-      // Spiral: fade out with a very subtle scale-up
-      spiral.style.opacity      = String(clamp(1 - ease, 0, 1));
-      spiral.style.transform    = `scale(${1 + ease * 0.06})`;
-      spiral.style.pointerEvents = ease > 0.5 ? 'none' : 'auto';
-
-      // Globe: fade in with a subtle scale-up from 0.97 → 1
-      globe.style.opacity       = String(clamp(ease, 0, 1));
-      globe.style.transform     = `scale(${0.97 + ease * 0.03})`;
-      globe.style.pointerEvents = ease > 0.5 ? 'auto' : 'none';
-      if (defoNarrative) defoNarrative.classList.toggle('visible', ease > 0.7);
-
-    } else {
-      // ── Phase 3: Globe fully revealed ───────────────────────────────
-      spiral.style.opacity      = '0';
-      spiral.style.transform    = 'scale(1.06)';
-      spiral.style.pointerEvents = 'none';
-      globe.style.opacity       = '1';
-      globe.style.transform     = 'scale(1)';
-      globe.style.pointerEvents = 'auto';
-      if (defoNarrative) defoNarrative.classList.add('visible');
-    }
+    spiral.style.opacity       = '1';
+    spiral.style.transform     = 'scale(1)';
+    spiral.style.pointerEvents = 'auto';
+    globe.style.opacity        = String(stableT);
+    globe.style.transform      = 'scale(1)';
+    globe.style.pointerEvents  = 'none';
+    globe.style.zIndex         = stableT > 0 ? '4' : '2';
+    globe.style.background     = 'transparent';
+    globe.style.backgroundImage = 'none';
+    if (hint) hint.classList.remove('visible');
+    if (defoNarrative) defoNarrative.classList.toggle('visible', stableT > 0.35);
   }
 
   window.addEventListener('scroll', update, { passive: true });
   update();
 
-  // Pause/resume globe rotation based on viewport visibility
-  const globeObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (!window.globeVis) return;
-        if (entry.isIntersecting) {
-          if (!window.globeVis.isPaused) window.globeVis.startRotation();
-        } else {
-          window.globeVis.stopRotation();
-        }
-      });
-    },
-    { threshold: 0.1 }
-  );
-  globeObserver.observe(globe);
+  // No scene-globe observer while transition is disabled.
 })();

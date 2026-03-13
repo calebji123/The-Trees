@@ -3,16 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="A visual narrative exploring the effects of climate change through data — temperature anomalies, CO₂ emissions, deforestation, and habitat loss." />
+    <meta
+      name="description"
+      content="A visual narrative exploring the effects of climate change through data — temperature anomalies, CO₂ emissions, deforestation, and habitat loss."
+    />
     <title>Our Warming World</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=Source+Sans+3:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=Source+Sans+3:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Bootstrap (needed by forest_rli_viz badge/button classes) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
 
     <!-- Global & component styles -->
     <link rel="stylesheet" href="css/main.css" />
@@ -29,7 +40,6 @@
     <link rel="stylesheet" href="css/globeVis.css" />
   </head>
   <body>
-
     <!-- =====================================================
          PROGRESS NAVIGATION (right-side dots)
     ====================================================== -->
@@ -40,7 +50,11 @@
     ====================================================== -->
     <section id="hero" class="hero-section">
       <div class="hero-bg">
-        <img src="assets/images/hero-earth.jpg" alt="Earth from space showing the thin atmosphere" class="hero-bg-img" />
+        <img
+          src="assets/images/hero-earth.jpg"
+          alt="Earth from space showing the thin atmosphere"
+          class="hero-bg-img"
+        />
         <div class="hero-overlay"></div>
       </div>
 
@@ -48,8 +62,8 @@
         <p class="hero-eyebrow">A Visual Story</p>
         <h1 class="hero-title">Our Warming World</h1>
         <p class="hero-subtitle">
-          The planet is changing faster than ever before. Explore the data, see the evidence,
-          and understand what it means for life on Earth.
+          The planet is changing faster than ever before. Explore the data, see
+          the evidence, and understand what it means for life on Earth.
         </p>
       </div>
 
@@ -65,20 +79,44 @@
     <section id="background" class="page-section">
       <div class="narrative reveal">
         <div class="section-eyebrow">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"
+            />
+          </svg>
           <span>The Crisis</span>
         </div>
-        <h2 class="section-heading">Earth is warming at an unprecedented rate</h2>
+        <h2 class="section-heading">
+          Earth is warming at an unprecedented rate
+        </h2>
         <p class="section-body">
-          Since the Industrial Revolution, human activities have released enormous quantities of
-          greenhouse gases into the atmosphere. The result? A planet heating faster than at any
-          point in at least the last 10,000 years. The consequences ripple through every ecosystem,
-          every community, every life on Earth.
+          Since the Industrial Revolution, human activities have released
+          enormous quantities of greenhouse gases into the atmosphere. The
+          result? A planet heating faster than at any point in at least the last
+          10,000 years. The consequences ripple through every ecosystem, every
+          community, every life on Earth.
         </p>
       </div>
 
       <div class="stats-row reveal">
-        <div class="stat-item" data-value="1.48" data-suffix="°C" data-prefix="+" data-decimals="2">
+        <div
+          class="stat-item"
+          data-value="1.48"
+          data-suffix="°C"
+          data-prefix="+"
+          data-decimals="2"
+        >
           <div class="stat-number">—</div>
           <div class="stat-label">Temperature rise since 1880</div>
         </div>
@@ -99,53 +137,103 @@
          3. TEMPERATURE SPIRAL + DEFORESTATION GLOBE
          Narrative above, then sticky scroll transition
     ====================================================== -->
-    <section id="temperature" class="page-section" style="padding-bottom: 2rem;">
+    <section id="temperature" class="page-section" style="padding-bottom: 2rem">
       <div class="narrative reveal">
         <div class="section-eyebrow">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"
+            />
+          </svg>
           <span>Rising Temperatures</span>
         </div>
         <h2 class="section-heading">A spiral of no return</h2>
         <p class="section-body">
-          This temperature spiral shows over 140 years of global temperature anomalies. Each ring
-          represents a year, expanding outward as temperatures climb. The shift from cool blues to
-          alarming reds tells a story that data alone cannot capture — a planet in distress.
-          Scroll down to zoom into the deforestation globe at its center.
+          This temperature spiral shows over 140 years of global temperature
+          anomalies. Each ring represents a year, expanding outward as
+          temperatures climb. The shift from cool blues to alarming reds tells a
+          story that data alone cannot capture — a planet in distress. Scroll
+          down to zoom into the deforestation globe at its center.
         </p>
       </div>
     </section>
 
     <!-- Scroll track: 300vh gives the transition room to breathe -->
-    <div id="spiral-globe-track" class="spiral-globe-track" style="height: 180vh;">
+    <div
+      id="spiral-globe-track"
+      class="spiral-globe-track"
+      style="height: 620vh"
+    >
       <div class="spiral-globe-sticky">
-
         <!-- SPIRAL SCENE -->
         <div id="scene-spiral" class="scene-layer scene-spiral">
           <section class="spiral-page">
             <section class="spiral-card">
-              <svg id="spiral_graph" aria-label="Spiral graph of global temperature anomalies"></svg>
-              <div id="timeline_graph" aria-label="Timeline for global temperature anomalies"></div>
-              <div id="tooltip" class="spiral-tooltip" role="status" aria-live="polite"></div>
+              <svg
+                id="spiral_graph"
+                aria-label="Spiral graph of global temperature anomalies"
+              ></svg>
+              <div id="spiral-center-globe"></div>
+              <div
+                id="timeline_graph"
+                aria-label="Timeline for global temperature anomalies"
+              ></div>
+              <div
+                id="tooltip"
+                class="spiral-tooltip"
+                role="status"
+                aria-live="polite"
+              ></div>
             </section>
           </section>
         </div>
 
         <!-- GLOBE SCENE — starts as clipped circle, expands on scroll -->
         <div id="scene-globe" class="scene-layer scene-globe">
-
           <!-- Deforestation narrative (left side, appears with globe) -->
           <div class="deforestation-narrative">
-            <div class="section-eyebrow" style="justify-content:flex-start;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--accent)"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+            <div class="section-eyebrow" style="justify-content: flex-start">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                style="color: var(--accent)"
+              >
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+                <line x1="6" y1="2" x2="6" y2="4" />
+                <line x1="10" y1="2" x2="10" y2="4" />
+                <line x1="14" y1="2" x2="14" y2="4" />
+              </svg>
               <span>Deforestation</span>
             </div>
             <h2 class="section-heading">The lungs of the Earth are burning</h2>
             <p class="section-body">
-              Forests are Earth's greatest carbon sinks, absorbing billions of tons of CO₂ annually.
-              Yet every year, we lose an area of forest roughly the size of a small country. These
-              hotspots are concentrated in tropical regions — the Amazon, Southeast Asia, Central
-              Africa — where biodiversity is richest and the stakes are highest.
-              <br><br>
+              Forests are Earth's greatest carbon sinks, absorbing billions of
+              tons of CO₂ annually. Yet every year, we lose an area of forest
+              roughly the size of a small country. These hotspots are
+              concentrated in tropical regions — the Amazon, Southeast Asia,
+              Central Africa — where biodiversity is richest and the stakes are
+              highest.
+              <br /><br />
               <em>Click any hotspot to explore its history.</em>
             </p>
           </div>
@@ -163,10 +251,16 @@
     ====================================================== -->
     <div class="globe-panel-backdrop" id="globe-panel-backdrop"></div>
 
-    <aside class="globe-side-panel" id="globe-side-panel" aria-label="Region deforestation details">
+    <aside
+      class="globe-side-panel"
+      id="globe-side-panel"
+      aria-label="Region deforestation details"
+    >
       <div class="gsp-header">
         <h3 class="gsp-title" id="gsp-title">Region</h3>
-        <button class="gsp-close" id="gsp-close" aria-label="Close panel">✕</button>
+        <button class="gsp-close" id="gsp-close" aria-label="Close panel">
+          ✕
+        </button>
       </div>
 
       <div class="gsp-stats" id="gsp-stats"></div>
@@ -178,11 +272,11 @@
 
       <div class="gsp-legend">
         <div class="gsp-legend-item">
-          <div class="gsp-legend-color" style="background:#c45d3e;"></div>
+          <div class="gsp-legend-color" style="background: #c45d3e"></div>
           <span>Forest Cover %</span>
         </div>
         <div class="gsp-legend-item">
-          <div class="gsp-legend-color" style="background:#2d6a4f;"></div>
+          <div class="gsp-legend-color" style="background: #2d6a4f"></div>
           <span>Bird Species</span>
         </div>
       </div>
@@ -190,8 +284,9 @@
       <div class="gsp-forest-context">
         <p class="gsp-forest-heading">Global Bird Red List Index</p>
         <p class="gsp-forest-sub">
-          Lower index = more species approaching extinction. The global RLI has declined
-          every year since records began — a signal of accelerating habitat loss.
+          Lower index = more species approaching extinction. The global RLI has
+          declined every year since records began — a signal of accelerating
+          habitat loss.
         </p>
         <div id="gsp-forest-chart"></div>
       </div>
@@ -201,49 +296,86 @@
          ARCTIC ICE PARALLAX BREAK
     ====================================================== -->
     <div class="parallax-break">
-      <div class="parallax-bg" style="background-image:url('assets/images/arctic-ice.jpg');background-attachment:fixed;background-size:cover;background-position:center;"></div>
+      <div
+        class="parallax-bg"
+        style="
+          background-image: url(&quot;assets/images/arctic-ice.jpg&quot;);
+          background-attachment: fixed;
+          background-size: cover;
+          background-position: center;
+        "
+      ></div>
       <div class="parallax-dark"></div>
       <div class="parallax-content">
         <p class="parallax-quote">The ice remembers what we choose to forget</p>
-        <p class="parallax-sub">Arctic sea ice has declined by over 40% since satellite records began in 1979</p>
+        <p class="parallax-sub">
+          Arctic sea ice has declined by over 40% since satellite records began
+          in 1979
+        </p>
       </div>
     </div>
 
     <!-- =====================================================
          4. CO₂ EMISSIONS — Country Spheres (own distinct section)
     ====================================================== -->
-    <section id="emissions" class="page-section" style="background:linear-gradient(180deg,var(--bg) 0%,#eae2d5 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <section
+      id="emissions"
+      class="page-section"
+      style="
+        background: linear-gradient(180deg, var(--bg) 0%, #eae2d5 100%);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      "
+    >
       <div class="narrative reveal">
         <div class="section-eyebrow">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+          </svg>
           <span>Carbon Emissions</span>
         </div>
         <h2 class="section-heading">A world fueled by carbon</h2>
         <p class="section-body">
-          Every country contributes to global emissions — but not equally. This visualization maps
-          CO₂ output per capita and total across the globe. Each bubble represents a nation, sized
-          by its emissions and colored by continent. The imbalance is striking: a handful of nations
-          produce the vast majority of emissions per person.
+          Every country contributes to global emissions — but not equally. This
+          visualization maps CO₂ output per capita and total across the globe.
+          Each bubble represents a nation, sized by its emissions and colored by
+          continent. The imbalance is striking: a handful of nations produce the
+          vast majority of emissions per person.
         </p>
       </div>
 
       <!-- Country Spheres visualization -->
-      <div id="country-spheres" class="viz-container" style="margin-top:2rem;"></div>
+      <div
+        id="country-spheres"
+        class="viz-container"
+        style="margin-top: 2rem"
+      ></div>
 
       <!-- Policy success spotlight -->
       <div class="emissions-highlight reveal">
         <h3>Countries where emissions turned the corner</h3>
         <div class="country-spotlights">
-
           <div class="country-spotlight">
             <div class="cs-flag">🇩🇪</div>
             <div class="cs-name">Germany</div>
             <div class="cs-since">Declining since 1990</div>
             <p class="cs-desc">
-              Germany's <em>Energiewende</em> (energy transition) drove a 40% drop in CO₂
-              emissions from 1990–2023. Aggressive expansion of wind and solar, combined with
-              coal phase-out legislation, shifted the country away from fossil fuels while
-              maintaining industrial output.
+              Germany's <em>Energiewende</em> (energy transition) drove a 40%
+              drop in CO₂ emissions from 1990–2023. Aggressive expansion of wind
+              and solar, combined with coal phase-out legislation, shifted the
+              country away from fossil fuels while maintaining industrial
+              output.
             </p>
             <div class="cs-trend">↓ −40% since 1990</div>
           </div>
@@ -253,9 +385,10 @@
             <div class="cs-name">United Kingdom</div>
             <div class="cs-since">Declining since 1991</div>
             <p class="cs-desc">
-              The UK halved its emissions since 1990 — one of the largest reductions among
-              developed economies. Closure of all coal plants, rapid offshore wind deployment,
-              and the legally binding 2008 Climate Change Act created consistent year-on-year cuts.
+              The UK halved its emissions since 1990 — one of the largest
+              reductions among developed economies. Closure of all coal plants,
+              rapid offshore wind deployment, and the legally binding 2008
+              Climate Change Act created consistent year-on-year cuts.
             </p>
             <div class="cs-trend">↓ −50% since 1991</div>
           </div>
@@ -265,23 +398,24 @@
             <div class="cs-name">Sweden</div>
             <div class="cs-since">Declining since 1980</div>
             <p class="cs-desc">
-              Sweden's carbon tax — introduced in 1991, now over $130/tonne — makes burning
-              fossil fuels economically painful. Combined with hydropower, nuclear energy, and
-              district heating, Sweden maintains some of the lowest per capita emissions among
-              wealthy nations.
+              Sweden's carbon tax — introduced in 1991, now over $130/tonne —
+              makes burning fossil fuels economically painful. Combined with
+              hydropower, nuclear energy, and district heating, Sweden maintains
+              some of the lowest per capita emissions among wealthy nations.
             </p>
             <div class="cs-trend">↓ −27% since 1990</div>
           </div>
-
         </div>
       </div>
 
-      <div class="narrative reveal" style="margin-top:3rem;">
+      <div class="narrative reveal" style="margin-top: 3rem">
         <p class="section-body">
-          Qatar, Kuwait, and Brunei lead per capita emissions, while the sheer scale of China,
-          the USA, and India dominates total output. As these bubbles grow over the decades,
-          the atmosphere accumulates more carbon — a debt that future generations will reckon with.
-          Yet the success stories above prove that political will and smart policy can reverse the trend.
+          Qatar, Kuwait, and Brunei lead per capita emissions, while the sheer
+          scale of China, the USA, and India dominates total output. As these
+          bubbles grow over the decades, the atmosphere accumulates more carbon
+          — a debt that future generations will reckon with. Yet the success
+          stories above prove that political will and smart policy can reverse
+          the trend.
         </p>
       </div>
     </section>
@@ -294,37 +428,73 @@
     <section id="habitat" class="page-section">
       <div class="narrative reveal">
         <div class="section-eyebrow">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3" />
+            <line x1="4" y1="20" x2="20" y2="20" />
+          </svg>
           <span>Habitat Loss</span>
         </div>
         <h2 class="section-heading">When forests fall, life follows</h2>
         <p class="section-body">
-          Birds are among the most sensitive indicators of ecosystem health. As forests shrink,
-          so do the populations that depend on them. This visualization captures the painful
-          correlation between forest loss and bird extinction risk — watching trees become stumps
-          and skies grow silent as the timeline progresses.
+          Birds are among the most sensitive indicators of ecosystem health. As
+          forests shrink, so do the populations that depend on them. This
+          visualization captures the painful correlation between forest loss and
+          bird extinction risk — watching trees become stumps and skies grow
+          silent as the timeline progresses.
         </p>
       </div>
 
       <!-- Forest RLI visualization mounts here -->
-      <div id="forest-rli-mount" class="viz-container" style="margin-top:2rem;max-width:1100px;margin-left:auto;margin-right:auto;"></div>
+      <div
+        id="forest-rli-mount"
+        class="viz-container"
+        style="
+          margin-top: 2rem;
+          max-width: 1100px;
+          margin-left: auto;
+          margin-right: auto;
+        "
+      ></div>
 
-      <div class="narrative reveal" style="margin-top:3rem;">
+      <div class="narrative reveal" style="margin-top: 3rem">
         <p class="section-body">
-          The Red List Index for bird species has declined steadily, meaning more species are
-          moving closer to extinction each year. With a risk index of 0.27, over a quarter of
-          assessed bird species face some level of extinction threat. The visualization makes
-          the abstract concrete — each fading tree, each vanishing bird, is a real loss.
+          The Red List Index for bird species has declined steadily, meaning
+          more species are moving closer to extinction each year. With a risk
+          index of 0.27, over a quarter of assessed bird species face some level
+          of extinction threat. The visualization makes the abstract concrete —
+          each fading tree, each vanishing bird, is a real loss.
         </p>
       </div>
     </section>
 
     <!-- DEFORESTATION PARALLAX -->
     <div class="parallax-break">
-      <div class="parallax-bg" style="background-image:url('assets/images/deforestation.jpg');background-attachment:fixed;background-size:cover;background-position:center;"></div>
+      <div
+        class="parallax-bg"
+        style="
+          background-image: url(&quot;assets/images/deforestation.jpg&quot;);
+          background-attachment: fixed;
+          background-size: cover;
+          background-position: center;
+        "
+      ></div>
       <div class="parallax-dark"></div>
       <div class="parallax-content">
-        <p class="parallax-quote">Every minute, the equivalent of 27 football fields of forest is destroyed</p>
+        <p class="parallax-quote">
+          Every minute, the equivalent of 27 football fields of forest is
+          destroyed
+        </p>
       </div>
     </div>
 
@@ -335,26 +505,57 @@
     ====================================================== -->
     <section id="hope" class="page-section">
       <div class="narrative reveal">
-        <div class="section-eyebrow" style="color:var(--primary);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--primary)"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-          <span style="color:var(--primary)">A Path Forward</span>
+        <div class="section-eyebrow" style="color: var(--primary)">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            style="color: var(--primary)"
+          >
+            <path
+              d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"
+            />
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+          </svg>
+          <span style="color: var(--primary)">A Path Forward</span>
         </div>
         <h2 class="section-heading">But the story is not over yet</h2>
         <p class="section-body">
-          While the data is alarming, it is not hopeless. Renewable energy adoption is accelerating.
-          Reforestation efforts are expanding. Policy changes are taking effect. The same data that
-          shows us the damage also points toward the solutions — if we act now.
+          While the data is alarming, it is not hopeless. Renewable energy
+          adoption is accelerating. Reforestation efforts are expanding. Policy
+          changes are taking effect. The same data that shows us the damage also
+          points toward the solutions — if we act now.
         </p>
       </div>
     </section>
 
     <!-- HOPE PARALLAX -->
     <div class="parallax-break">
-      <div class="parallax-bg" style="background-image:url('assets/images/hope-forest.jpg');background-attachment:fixed;background-size:cover;background-position:center;"></div>
-      <div class="parallax-dark" style="background:rgba(26,22,18,0.42);"></div>
+      <div
+        class="parallax-bg"
+        style="
+          background-image: url(&quot;assets/images/hope-forest.jpg&quot;);
+          background-attachment: fixed;
+          background-size: cover;
+          background-position: center;
+        "
+      ></div>
+      <div
+        class="parallax-dark"
+        style="background: rgba(26, 22, 18, 0.42)"
+      ></div>
       <div class="parallax-content">
         <p class="parallax-quote">Renewal is possible</p>
-        <p class="parallax-sub">Global renewable energy capacity grew by 50% in 2023 alone</p>
+        <p class="parallax-sub">
+          Global renewable energy capacity grew by 50% in 2023 alone
+        </p>
       </div>
     </div>
 
@@ -375,25 +576,57 @@
         </div>
       </div>
 
-      <div class="narrative reveal" style="margin-top:3rem;">
+      <div class="narrative reveal" style="margin-top: 3rem">
         <p class="section-body">
-          EU policy initiatives have demonstrably reduced emissions in participating nations.
-          Anti-deforestation hotspots — places where forest cover is actually growing — are
-          emerging in Europe, East Asia, and parts of North America. These bright spots prove
-          that systemic change is possible when political will meets public action.
+          EU policy initiatives have demonstrably reduced emissions in
+          participating nations. Anti-deforestation hotspots — places where
+          forest cover is actually growing — are emerging in Europe, East Asia,
+          and parts of North America. These bright spots prove that systemic
+          change is possible when political will meets public action.
         </p>
       </div>
 
-      <div class="narrative reveal" style="margin-top:3rem;">
-        <h3 style="font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2.2rem);color:var(--fg);line-height:1.3;">
+      <div class="narrative reveal" style="margin-top: 3rem">
+        <h3
+          style="
+            font-family: &quot;Playfair Display&quot;, serif;
+            font-size: clamp(1.4rem, 3vw, 2.2rem);
+            color: var(--fg);
+            line-height: 1.3;
+          "
+        >
           The data is clear. The question is: what will we do with it?
         </h3>
         <div class="cta-group">
-          <a href="https://www.un.org/en/climatechange" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <a
+            href="https://www.un.org/en/climatechange"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary"
+          >
             Take Action
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
           </a>
-          <a href="https://climate.nasa.gov/" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+          <a
+            href="https://climate.nasa.gov/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-secondary"
+          >
             Explore the Data
           </a>
         </div>
@@ -409,7 +642,9 @@
         A visual narrative exploring the effects of climate change through data.
         Built to inform, provoke thought, and inspire action.
       </p>
-      <p class="footer-meta">Data sources: NASA, NOAA, Global Forest Watch, IUCN</p>
+      <p class="footer-meta">
+        Data sources: NASA, NOAA, Global Forest Watch, IUCN
+      </p>
       <p class="footer-copy">Created with care for our planet</p>
     </footer>
 
@@ -418,7 +653,11 @@
     ====================================================== -->
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
 
     <!-- D3 and TopoJSON -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -441,6 +680,5 @@
 
     <!-- Main initialization -->
     <script src="js/main.js"></script>
-
   </body>
 </html>
