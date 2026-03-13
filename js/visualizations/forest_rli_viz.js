@@ -11,12 +11,10 @@ function renderForestRLIPanelViz(mountId, regionData) {
   const IMG_TREES = "assets/trees.PNG";
   const IMG_SMOKE = "assets/smoke.PNG";
 
-  // Sharper transitions
   const minSmoke = 0.08, maxSmoke = 0.70;
   const minRain  = 0.06, maxRain  = 0.82;
   const blendPx = 12;
 
-  // Canvas for the side panel
   const W = 520, H = 420;
   const margin = { l: 10, r: 10, t: 8, b: 6 };
 

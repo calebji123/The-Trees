@@ -59,7 +59,6 @@ class GlobeVis {
   /**
    * Load data from CSV file
    */
-
   async loadData() {
     try {
       const [rawData, rawRLI] = await Promise.all([
@@ -67,9 +66,6 @@ class GlobeVis {
         d3.csv('data/red-list-index.csv', d3.autoType)
       ]);
 
-      // -----------------------------
-      // Build RLI lookup by entity + year
-      // -----------------------------
       const rliByEntityYear = new Map();
       rawRLI.forEach(row => {
         const entity = String(row.Entity || '').trim();
@@ -81,10 +77,6 @@ class GlobeVis {
         }
       });
 
-      // -----------------------------
-      // Region -> country/entity mapping
-      // Approximate ecological-region averages
-      // -----------------------------
       const regionToEntities = {
         "Amazon": [
           "Brazil", "Peru", "Colombia", "Bolivia",
@@ -160,10 +152,9 @@ class GlobeVis {
       };
 
       // -----------------------------
-      // Helper: yearly average RLI for a region
+      // yearly average RLI for a region
       // -----------------------------
       const getRegionRLI = (regionName, year) => {
-        // Direct match first
         const direct = rliByEntityYear.get(`${regionName}__${year}`);
         if (direct != null) return direct;
 
@@ -179,7 +170,7 @@ class GlobeVis {
       };
 
       // -----------------------------
-      // Build region time series from deforestation.csv
+      // Build region time series
       // -----------------------------
       const grouped = d3.group(rawData, d => d.region);
 
@@ -201,7 +192,7 @@ class GlobeVis {
       }));
 
       // -----------------------------
-      // Forest loss intensity for hotspot flame size
+      // Forest loss intensity for hotspot
       // -----------------------------
       let maxForestLoss = 0;
       this.data.forEach(r => {
