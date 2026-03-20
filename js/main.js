@@ -11,7 +11,4 @@ document.addEventListener('DOMContentLoaded', () => {
     dataPath: 'data/global_temperature.csv'
   });
 
-  // ── Forest Loss & Bird Extinction Risk ────────────────────
-  initForestRLIViz('forest-rli-mount');
-
 });

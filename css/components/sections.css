@@ -105,6 +105,15 @@
   line-height: 1.4;
 }
 
+.stat-unit {
+  font-size: 0.68rem;
+  color: var(--fg-muted);
+  opacity: 0.8;
+  max-width: 200px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
 /* ── Section divider ── */
 .section-divider {
   max-width: 800px;
@@ -236,6 +245,26 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--primary);
+}
+
+.country-mini-chart-wrap {
+  margin-top: 0.9rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.country-mini-chart-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.country-mini-chart {
+  width: 100%;
+  min-height: 74px;
 }
 
 /* ── Hope section ── */

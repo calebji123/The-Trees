@@ -8,7 +8,6 @@
     { id: 'background', label: 'The Crisis' },
     { id: 'temperature', label: 'Temperature' },
     { id: 'emissions',  label: 'Emissions' },
-    { id: 'habitat',    label: 'Habitat' },
     { id: 'hope',       label: 'Hope' },
   ];
 
