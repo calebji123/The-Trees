@@ -103,32 +103,47 @@
   margin-bottom: 12px;
 }
 
-/* Scroll hint overlay at bottom of spiral phase */
+/* Scroll hint overlay positioned just under the globe */
 .spiral-scroll-hint {
   position: absolute;
-  bottom: 1.5rem;
+  bottom: clamp(4.5rem, 14vh, 8.5rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--fg-muted);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
   opacity: 0;
   transition: opacity 0.4s;
   pointer-events: none;
-  white-space: nowrap;
 }
 
 .spiral-scroll-hint.visible {
   opacity: 1;
 }
 
-.spiral-scroll-hint::before {
-  content: '↓';
+.spiral-scroll-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  color: rgba(44, 36, 23, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: rgba(245, 240, 232, 0.28);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 10px 20px rgba(26, 22, 18, 0.08);
+  animation: spiral-scroll-bounce 1.35s ease-in-out infinite;
+}
+
+@keyframes spiral-scroll-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
 }
 
 /* Deforestation narrative that overlays the globe */
@@ -185,4 +200,5 @@
     opacity: 1 !important;
   }
   .scene-spiral { position: static; }
+  .spiral-scroll-hint { display: none; }
 }

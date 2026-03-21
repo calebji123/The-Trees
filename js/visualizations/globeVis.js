@@ -23,6 +23,8 @@ class GlobeVis {
     this.rotationTimer = null;
     this.graticulePath = null;
     this.data = [];
+    this.hotspotsVisible = false;
+    this.hotspotVisibilityListener = null;
   }
 
   /**
@@ -32,9 +34,34 @@ class GlobeVis {
     this.buildHTML();
     await this.loadData();
     this.setupSvg();
+    this.bindHotspotVisibilityEvents();
     this.loadMap();
     this.addDragBehavior();
     this.startRotation();
+  }
+
+  bindHotspotVisibilityEvents() {
+    this.hotspotVisibilityListener = (event) => {
+      if (!event || !event.detail) return;
+      this.setHotspotsVisible(Boolean(event.detail.visible));
+    };
+    window.addEventListener('globe:hotspots-visibility-state', this.hotspotVisibilityListener);
+
+    // Sync immediately for late-initialized globe instances.
+    this.setHotspotsVisible(Boolean(window.__deforestationHotspotsVisible));
+  }
+
+  setHotspotsVisible(visible) {
+    this.hotspotsVisible = Boolean(visible);
+    if (!this.hotspotGroup) return;
+
+    this.hotspotGroup
+      .selectAll('.globe-hotspot-group')
+      .style('opacity', this.hotspotsVisible ? 1 : 0);
+
+    if (!this.hotspotsVisible) {
+      this.hotspotGroup.selectAll('.globe-hotspot').attr('stroke', 'none');
+    }
   }
 
   /**

@@ -74,6 +74,7 @@ class SpiralGraph {
 		this.globeZoomStrength = 1.35;
 		this.globeZoomPower = 1.35;
 		this.centerGlobeSizeFactor = 0.78;
+		this.hasAnnouncedPlaythroughComplete = false;
 
 		this.initLayout();
 		this.initScrollDepthInteraction();
@@ -373,6 +374,14 @@ class SpiralGraph {
 			defaultSpeed: 120,
 			onChange: (year) => {
 				this.syncToYear(year, false);
+				if (!this.hasAnnouncedPlaythroughComplete && year >= this.endYear) {
+					this.hasAnnouncedPlaythroughComplete = true;
+					window.dispatchEvent(
+						new CustomEvent("spiral:playthrough-complete", {
+							detail: { year }
+						})
+					);
+				}
 			}
 		});
 	}
