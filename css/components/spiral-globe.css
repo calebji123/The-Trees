@@ -111,8 +111,10 @@
   transform: translateX(-50%);
   z-index: 10;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   opacity: 0;
   transition: opacity 0.4s;
   pointer-events: none;
@@ -135,6 +137,14 @@
   backdrop-filter: blur(4px);
   box-shadow: 0 10px 20px rgba(26, 22, 18, 0.08);
   animation: spiral-scroll-bounce 1.35s ease-in-out infinite;
+}
+
+.spiral-scroll-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: rgba(44, 36, 23, 0.65);
+  white-space: nowrap;
 }
 
 @keyframes spiral-scroll-bounce {
