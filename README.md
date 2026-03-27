@@ -1,8 +1,8 @@
-# The Trees: Climate Change in Motion
+# The Trees Presents: Our Warming World
 
 ## Project Overview
 
-The Trees is an interactive data-visualization project about climate change and ecological loss.  
+Our Warming World is an interactive data-visualization project about climate change and ecological loss. 
 Instead of presenting one chart in isolation, it combines multiple visual stories into a single experience: global warming over time, country-level emissions, deforestation hotspots, and biodiversity risk.
 
 The goal is to make long-term environmental change easier to understand, compare, and remember.
@@ -38,6 +38,8 @@ No backend service is required for normal use.
 
 ## User Guide
 
+Visit the hosted website at [calebji.com/The-Trees](https://calebji.com/The-Trees/)
+
 1. Open the project in a browser.
 2. Start with the temperature view to understand the historical baseline.
 3. Move to the globe and click hotspots to inspect deforestation severity and trend details.
@@ -55,16 +57,3 @@ By the end of the walkthrough, users should be able to:
 - connect emissions and land-use pressure to biodiversity risk,
 - and explain climate change as a linked system rather than separate issues.
 
-## Running Locally
-
-```bash
-cd /Users/bu/Desktop/The-Trees
-python3 -m http.server 8080
-```
-
-Then open [http://localhost:8080](http://localhost:8080).
-
-## Notes
-
-- Internet access is required for third-party map/data dependencies loaded at runtime.
-- If a view appears blank, check the browser console and network tab first.
