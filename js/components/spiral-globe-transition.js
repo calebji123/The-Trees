@@ -84,7 +84,12 @@
     return window.innerHeight - rect.bottom;
   }
 
+  const sidePanel = document.getElementById('globe-side-panel');
+
   window.addEventListener('wheel', function (e) {
+    // Don't intercept scrolling inside the side panel
+    if (sidePanel && sidePanel.contains(e.target)) return;
+
     const p = getProgress();
     const isTransition = p >= FADE_START - 0.03 && p <= FADE_END + 0.04;
     const isSettle     = !isTransition && p > SETTLE_START && p <= 1.0;
@@ -174,6 +179,7 @@
     if (hint) {
       hint.classList.toggle('visible', spiralPlaythroughComplete && stableT < 0.85);
     }
+
   }
 
   /* ── Scroll event — just dispatches progress for other listeners ── */

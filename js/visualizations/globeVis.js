@@ -605,4 +605,5 @@ class GlobeVis {
 
     this.svg.call(drag);
   }
+
 }
