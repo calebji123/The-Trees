@@ -54,9 +54,9 @@
   const SETTLE_MAX     = 40;
 
   // Post-track buffer — dampen momentum that would carry past the globe
-  const POST_TRACK_BUFFER = 600; // px past the track bottom to dampen
-  const POST_TRACK_DAMPEN = 0.20;
-  const POST_TRACK_MAX    = 35;
+  const POST_TRACK_BUFFER = 200; // px past the track bottom to dampen
+  const POST_TRACK_DAMPEN = 0.55;
+  const POST_TRACK_MAX    = 60;
 
   // Smooth chasing — max rate the visual value can move per frame
   const MAX_STEP       = 0.012;  // ~83 frames (≈1.4 s at 60fps) to cross 0→1
