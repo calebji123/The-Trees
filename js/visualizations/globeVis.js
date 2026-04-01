@@ -43,21 +43,26 @@ class GlobeVis {
   bindHotspotVisibilityEvents() {
     this.hotspotVisibilityListener = (event) => {
       if (!event || !event.detail) return;
-      this.setHotspotsVisible(Boolean(event.detail.visible));
+      this.setHotspotsVisible(Boolean(event.detail.visible), Boolean(event.detail.clickable));
     };
     window.addEventListener('globe:hotspots-visibility-state', this.hotspotVisibilityListener);
 
     // Sync immediately for late-initialized globe instances.
-    this.setHotspotsVisible(Boolean(window.__deforestationHotspotsVisible));
+    this.setHotspotsVisible(
+      Boolean(window.__deforestationHotspotsVisible),
+      Boolean(window.__deforestationHotspotsClickable)
+    );
   }
 
-  setHotspotsVisible(visible) {
+  setHotspotsVisible(visible, clickable) {
     this.hotspotsVisible = Boolean(visible);
+    this.hotspotsClickable = Boolean(clickable);
     if (!this.hotspotGroup) return;
 
     this.hotspotGroup
       .selectAll('.globe-hotspot-group')
-      .style('opacity', this.hotspotsVisible ? 1 : 0);
+      .style('opacity', this.hotspotsVisible ? 1 : 0)
+      .style('pointer-events', this.hotspotsClickable ? 'auto' : 'none');
 
     if (!this.hotspotsVisible) {
       this.hotspotGroup.selectAll('.globe-hotspot').attr('stroke', 'none');
@@ -600,4 +605,5 @@ class GlobeVis {
 
     this.svg.call(drag);
   }
+
 }
