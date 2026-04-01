@@ -162,14 +162,26 @@
     }
 
     spiral.style.opacity        = '1';
-    spiral.style.transform      = 'scale(1)';
     // The actual globe SVG lives inside #scene-spiral (embedded in the
     // spiral center hole), so spiral must stay pointer-events: auto
     // at all times — otherwise drag and hotspot clicks are killed.
     spiral.style.pointerEvents  = 'auto';
     globe.style.opacity         = String(stableT);
-    globe.style.transform       = 'scale(1)';
     globe.style.pointerEvents   = 'none';
+
+    // When the transition is complete, remove transform & will-change so the
+    // browser re-rasterizes at native resolution (avoids blurry globe).
+    if (stableT >= 1) {
+      spiral.style.transform    = '';
+      spiral.style.willChange   = 'auto';
+      globe.style.transform     = '';
+      globe.style.willChange    = 'auto';
+    } else {
+      spiral.style.transform    = 'scale(1)';
+      spiral.style.willChange   = 'opacity, transform';
+      globe.style.transform     = 'scale(1)';
+      globe.style.willChange    = 'opacity';
+    }
     globe.style.zIndex          = stableT > 0 ? '4' : '2';
     globe.style.background      = 'transparent';
     globe.style.backgroundImage = 'none';
@@ -191,5 +203,40 @@
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Keyboard shortcut: Enter to auto-scroll through transition ── */
+  let autoScrolling = false;
+  window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    // Only trigger when hint is visible (spiral done, transition not yet complete)
+    if (!hint || !hint.classList.contains('visible')) return;
+    if (autoScrolling) return;
+    e.preventDefault();
+    autoScrolling = true;
+
+    // Target: scroll to FADE_END of the track
+    const trackRect  = track.getBoundingClientRect();
+    const scrollable = track.offsetHeight - window.innerHeight;
+    const targetScroll = track.offsetTop + scrollable * FADE_END + scrollable * 0.08;
+    const startScroll  = window.scrollY;
+    const distance     = targetScroll - startScroll;
+    const duration     = 1200; // ms
+    const startTime    = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      // ease-in-out cubic
+      const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      window.scrollTo({ top: startScroll + distance * ease, behavior: 'instant' });
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        autoScrolling = false;
+      }
+    }
+    requestAnimationFrame(step);
+  });
+
   requestAnimationFrame(loop);
 })();
