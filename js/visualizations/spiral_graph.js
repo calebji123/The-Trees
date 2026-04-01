@@ -338,10 +338,8 @@ class SpiralGraph {
 			this.renderLegend();
 			this.initTimelineSlider();
 			this.syncToYear(this.startYear, true);
-			if (this.timelineSlider) {
-				this.timelineSlider.play();
-			}
 			this.initCenterGlobeOverlay();
+			this.waitForVisibleThenPlay();
 		});
 	}
 
@@ -384,6 +382,24 @@ class SpiralGraph {
 				}
 			}
 		});
+	}
+
+	waitForVisibleThenPlay() {
+		if (!this.timelineSlider) return;
+		const svgEl = this.svg.node();
+		if (!svgEl) return;
+
+		const observer = new IntersectionObserver((entries) => {
+			for (const entry of entries) {
+				if (entry.isIntersecting) {
+					observer.disconnect();
+					this.timelineSlider.play();
+					return;
+				}
+			}
+		}, { threshold: 0.15 });
+
+		observer.observe(svgEl);
 	}
 
 	renderLegend() {
