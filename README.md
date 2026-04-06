@@ -1,5 +1,9 @@
 # The Trees Presents: Our Warming World
 
+## Links
+Visit the hosted website at [calebji.com/The-Trees](https://calebji.com/The-Trees/). \
+Experience a narrated video guide [here](https://www.youtube.com/watch?v=SZDbpYzDZ5A).
+
 ## Project Overview
 
 Our Warming World is an interactive data-visualization project about climate change and ecological loss. 
@@ -14,46 +18,30 @@ This project was built to answer a simple question:
 
 How do temperature rise, emissions, forest loss, and species risk relate when viewed together?
 
-By placing these views side by side in one interface, the project helps users move from global patterns to regional detail without losing context.
+## What it contains
 
-## What It Does
-
-The experience includes four complementary visualizations:
+The experience includes four main visualizations:
 
 - A temperature spiral that highlights long-run warming trends.
 - A rotating globe with deforestation hotspots, where each hotspot opens a historical trend view.
-- A country-based emissions view for comparing scale and distribution.
 - A forest-loss and bird-risk scene that ties ecological decline to changing risk levels over time.
+- A country-based emissions view for comparing scale and distribution.
 
-Each view focuses on a different part of the climate story, but together they present one narrative: environmental systems are connected, and the effects are cumulative.
+Each view focuses on a different part of the climate story, but together they present one narrative: climate action is needed, and our positive effects are possible.
 
 ## How It Works (High Level)
 
-- The project runs as a static web page.
-- Data is loaded from CSV sources and rendered client-side.
-- Interactions (hover, click, drag, slider input) update the visuals in place.
-- Geographic rendering uses D3 map projections and world geometry for context.
+- The project runs as a static web page hosted from the index.html
+- Data is loaded from CSV sources in `data/`
+- Images used for the website are loaded from `assets/`
+- All scripts are in `js/`, `js/components` contains the web components whereas `js/visalizations` contains the scripts to render the D3 visualizations.
 
-No backend service is required for normal use.
 
-## User Guide
+This project was created in collaboration by Sam Lukas, Caleb Ji, Abhigyan Dey, and Yuhang Cai for the CSC316 course at the University of Toronto.
+To see more about our development process, check out our [process book](https://docs.google.com/document/d/1fqxqTOeiVB0oYPj2YzUNuBl_jPLZwyDqgnHTczinOmI/edit?tab=t.8n0i8ha4fj9#heading=h.uqy60jewwb23)
 
-Visit the hosted website at [calebji.com/The-Trees](https://calebji.com/The-Trees/)
 
-1. Open the project in a browser.
-2. Start with the temperature view to understand the historical baseline.
-3. Move to the globe and click hotspots to inspect deforestation severity and trend details.
-4. Compare country-level emissions to see geographic imbalance.
-5. Use the forest/risk view to connect land-use decline with biodiversity pressure.
 
-Recommended reading flow: global trend -> regional hotspot -> country comparison -> ecological outcome.
 
-## Outcome
 
-By the end of the walkthrough, users should be able to:
-
-- identify where change is accelerating,
-- compare severity across regions,
-- connect emissions and land-use pressure to biodiversity risk,
-- and explain climate change as a linked system rather than separate issues.
 
